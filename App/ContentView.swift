@@ -4,13 +4,26 @@ import UIKit
 // MARK: - Navigation Model
 
 enum AppSection: String, CaseIterable, Identifiable {
-    case matrixSetup = "Matrix Setup"
     case introduction = "Introduction"
+    case matrixSetup = "Matrix Setup"
     case nullSpace = "Null Space"
     case columnSpace = "Column Space"
     case rowSpace = "Row Space"
     case leftNullSpace = "Left Null Space"
+    case inverse = "Matrix Inverse"
+    case determinant = "Determinant"
+    case eigenvalues = "Eigenvalues"
+    case eigenvectors = "Eigenvectors"
+    case diagonalization = "Diagonalization"
+    case orthogonality = "Inner Product & Orthogonality"
+    case distanceHyperplane = "Distance to Hyperplane"
+    case leastSquaresInconsistent = "Inconsistent System LS"
+    case leastSquaresError = "Least Square Error"
+    case leastSquaresInfinite = "Infinite Solutions LS"
+    case linearRegression = "Linear Regression"
+    case quadraticCurveFitting = "Quadratic Curve Fitting"
     case geometric = "Geometric Visualization"
+    case settings = "Settings"
     
     var id: String { rawValue }
     
@@ -20,6 +33,18 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .columnSpace: return "C(A)"
         case .rowSpace: return "C(Aᵀ)"
         case .leftNullSpace: return "N(Aᵀ)"
+        case .inverse: return "A⁻¹"
+        case .determinant: return "|A|"
+        case .eigenvalues: return "λ"
+        case .eigenvectors: return "v"
+        case .diagonalization: return "PDP⁻¹"
+        case .orthogonality: return "u·v"
+        case .distanceHyperplane: return "dist"
+        case .leastSquaresInconsistent: return "LS"
+        case .leastSquaresError: return "E"
+        case .leastSquaresInfinite: return "LS∞"
+        case .linearRegression: return "y=mx+b"
+        case .quadraticCurveFitting: return "y=ax²+bx+c"
         case .geometric: return "3D"
         default: return ""
         }
@@ -30,6 +55,19 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .matrixSetup: return "grid"
         case .introduction: return "book.fill"
         case .geometric: return "cube.transparent"
+        case .inverse: return "1.square"
+        case .determinant: return "sum"
+        case .eigenvalues: return "function"
+        case .eigenvectors: return "arrow.up.left.and.arrow.down.right"
+        case .diagonalization: return "arrow.triangle.2.circlepath"
+        case .orthogonality: return "angle"
+        case .distanceHyperplane: return "arrow.up.to.line"
+        case .leastSquaresInconsistent: return "exclamationmark.triangle"
+        case .leastSquaresError: return "chart.bar"
+        case .leastSquaresInfinite: return "infinity"
+        case .linearRegression: return "chart.xyaxis.line"
+        case .quadraticCurveFitting: return "chart.line.uptrend.xyaxis"
+        case .settings: return "gear"
         default: return "" // Custom icon for subspaces
         }
     }
@@ -51,6 +89,8 @@ class MatrixData: ObservableObject {
     @Published var leftNullSpace: [[Fraction]] = []
     @Published var pivots: [Int] = []
     @Published var hasComputed: Bool = false
+    @Published var determinantValue: Fraction? = nil
+    @Published var inverseMatrix: [[Fraction]]? = nil
     
     // Explanations
     @Published var columnSpaceExplanation: String = ""
@@ -59,10 +99,11 @@ class MatrixData: ObservableObject {
     @Published var leftNullSpaceExplanation: String = ""
     
     init() {
-        self.rows = 2
+        self.rows = 3
         self.cols = 3
-        values[0][0] = "1"; values[0][1] = "2"; values[0][2] = "-1"
-        values[1][0] = "2"; values[1][1] = "4"; values[1][2] = "-2"
+        values[0][0] = "4"; values[0][1] = "1"; values[0][2] = "-1"
+        values[1][0] = "2"; values[1][1] = "5"; values[1][2] = "-2"
+        values[2][0] = "1"; values[2][1] = "1"; values[2][2] = "2"
         // Computation will happen on first view appear or manual trigger
         // We defer calling compute() here to let SwiftUI layout first, but we can't easily.
         // Instead, we will rely on onAppear or just not compute initially (user clicks Compute).
@@ -79,6 +120,7 @@ class MatrixData: ObservableObject {
         rowSpace = []
         nullSpace = []
         leftNullSpace = []
+        determinantValue = nil
     }
     
     func getFractionMatrix() -> [[Fraction]] {
@@ -128,6 +170,49 @@ class MatrixData: ObservableObject {
         leftNullSpace = MatrixEngine.getLeftNullSpace(originalMatrix: matrix)
         leftNullSpaceExplanation = "The left null space is the null space of Aᵀ. We compute RREF(Aᵀ) and find the basis for N(Aᵀ) using the same method as for the null space."
         
+        // Compute Determinant (if square)
+        if rows == cols {
+            determinantValue = MatrixEngine.calculateDeterminantValue(matrix)
+            
+            // Compute Inverse
+            let invSteps = MatrixEngine.calculateInverseSteps(matrix: matrix)
+            if let lastStep = invSteps.last {
+                let rrefAug = lastStep.matrix
+                let n = rows
+                
+                // Check if Identity on left
+                var isIdentity = true
+                for i in 0..<n {
+                    for j in 0..<n {
+                        let val = rrefAug[i][j]
+                        if i == j {
+                            if val.numerator != 1 || val.denominator != 1 { isIdentity = false; break }
+                        } else {
+                            if val.numerator != 0 { isIdentity = false; break }
+                        }
+                    }
+                    if !isIdentity { break }
+                }
+                
+                if isIdentity {
+                    var inv: [[Fraction]] = []
+                    for i in 0..<n {
+                        var row: [Fraction] = []
+                        for j in n..<2*n {
+                            row.append(rrefAug[i][j])
+                        }
+                        inv.append(row)
+                    }
+                    inverseMatrix = inv
+                } else {
+                    inverseMatrix = nil
+                }
+            }
+        } else {
+            determinantValue = nil
+            inverseMatrix = nil
+        }
+        
         withAnimation {
             hasComputed = true
         }
@@ -139,29 +224,107 @@ class MatrixData: ObservableObject {
 struct ContentView: View {
     @State private var selectedSection: AppSection? = .introduction
     @StateObject private var matrixData = MatrixData()
+    @AppStorage("isDarkMode") private var isDarkMode: Bool = false
+    @AppStorage("useSystemTheme") private var useSystemTheme: Bool = true
     
     var body: some View {
         NavigationSplitView {
             List(selection: $selectedSection) {
                 Section(header: Text("Topics")) {
-                    ForEach(AppSection.allCases) { section in
-                        NavigationLink(value: section) {
-                            HStack {
-                                if !section.iconName.isEmpty {
-                                    Image(systemName: section.iconName)
-                                        .frame(width: 24)
-                                } else {
-                                    // Custom Notation Icon
-                                    Text(section.notation)
-                                        .font(.system(size: 10, weight: .bold, design: .monospaced))
-                                        .padding(4)
-                                        .background(Color.gray.opacity(0.2))
-                                        .cornerRadius(4)
-                                        .frame(width: 34, height: 24) // Fixed width for alignment
-                                }
-                                Text(section.rawValue)
-                            }
+                    // 1. Introduction
+                    NavigationLink(value: AppSection.introduction) {
+                        Label(AppSection.introduction.rawValue, systemImage: AppSection.introduction.iconName)
+                    }
+                    
+                    // 2. Matrix Setup
+                    NavigationLink(value: AppSection.matrixSetup) {
+                        Label(AppSection.matrixSetup.rawValue, systemImage: AppSection.matrixSetup.iconName)
+                    }
+                    
+                    // 3. Subspaces Dropdown
+                    DisclosureGroup(
+                        content: {
+                            NavigationLink(value: AppSection.columnSpace) { Label("Column Space C(A)", systemImage: "arrow.up.right.square") }
+                            NavigationLink(value: AppSection.nullSpace) { Label("Null Space N(A)", systemImage: "circle.dashed.inset.filled") }
+                            NavigationLink(value: AppSection.rowSpace) { Label("Row Space C(Aᵀ)", systemImage: "tablecells") }
+                            NavigationLink(value: AppSection.leftNullSpace) { Label("Left Null Space N(Aᵀ)", systemImage: "arrow.uturn.left.square") }
+                        },
+                        label: {
+                            Label("Fundamental Subspaces", systemImage: "square.stack.3d.up")
                         }
+                    )
+                    
+                    // 4. Matrix Inverse
+                    NavigationLink(value: AppSection.inverse) {
+                        Label(AppSection.inverse.rawValue, systemImage: AppSection.inverse.iconName)
+                    }
+                    
+                    // 5. Determinant
+                    NavigationLink(value: AppSection.determinant) {
+                        Label(AppSection.determinant.rawValue, systemImage: AppSection.determinant.iconName)
+                    }
+
+                    // 6. Inner Product & Orthogonality
+                    NavigationLink(value: AppSection.orthogonality) {
+                        Label(AppSection.orthogonality.rawValue, systemImage: AppSection.orthogonality.iconName)
+                    }
+
+                    // 7. Least Squares Approximation
+                    DisclosureGroup(
+                        content: {
+                            NavigationLink(value: AppSection.distanceHyperplane) {
+                                Label("Dist to Hyperplane", systemImage: AppSection.distanceHyperplane.iconName)
+                            }
+                            NavigationLink(value: AppSection.leastSquaresInconsistent) {
+                                Label("Inconsistent System", systemImage: AppSection.leastSquaresInconsistent.iconName)
+                            }
+                            NavigationLink(value: AppSection.leastSquaresError) {
+                                Label("Least Square Error", systemImage: AppSection.leastSquaresError.iconName)
+                            }
+                            NavigationLink(value: AppSection.leastSquaresInfinite) {
+                                Label("Infinitely Many Sol.", systemImage: AppSection.leastSquaresInfinite.iconName)
+                            }
+                            NavigationLink(value: AppSection.linearRegression) {
+                                Label("Linear Regression", systemImage: AppSection.linearRegression.iconName)
+                            }
+                            NavigationLink(value: AppSection.quadraticCurveFitting) {
+                                Label("Quadratic Curve Fit", systemImage: AppSection.quadraticCurveFitting.iconName)
+                            }
+                        },
+                        label: {
+                            Label("Least Squares", systemImage: "chart.line.uptrend.xyaxis")
+                        }
+                    )
+                    
+                    // 8. Eigenvalues and Eigenvectors
+                    DisclosureGroup(
+                        content: {
+                            NavigationLink(value: AppSection.eigenvalues) {
+                                Label("Eigenvalues", systemImage: AppSection.eigenvalues.iconName)
+                            }
+                            NavigationLink(value: AppSection.eigenvectors) {
+                                Label("Eigenvectors", systemImage: AppSection.eigenvectors.iconName)
+                            }
+                        },
+                        label: {
+                            Label("Eigenvalues & Vectors", systemImage: "chart.xyaxis.line")
+                        }
+                    )
+
+                    // 9. Diagonalization
+                    NavigationLink(value: AppSection.diagonalization) {
+                        Label(AppSection.diagonalization.rawValue, systemImage: AppSection.diagonalization.iconName)
+                    }
+                    
+                    // 10. Geometric Visualization
+                    NavigationLink(value: AppSection.geometric) {
+                        Label(AppSection.geometric.rawValue, systemImage: AppSection.geometric.iconName)
+                    }
+                }
+                
+                Section(header: Text("App")) {
+                    NavigationLink(value: AppSection.settings) {
+                        Label("Settings", systemImage: "gear")
                     }
                 }
             }
@@ -191,6 +354,7 @@ struct ContentView: View {
                     .foregroundColor(.secondary)
             }
         }
+        .preferredColorScheme(useSystemTheme ? nil : (isDarkMode ? .dark : .light))
         .onAppear {
             if !matrixData.hasComputed {
                 matrixData.compute()
@@ -251,8 +415,30 @@ struct DetailView: View {
                         title: "Left Null Space N(Aᵀ)",
                         originalMatrix: matrixData.getFractionMatrix()
                     )
+                case .inverse:
+                    MatrixInverseView()
+                case .determinant:
+                    DeterminantView()
                 case .geometric:
                     GeometricVisualizationView()
+                case .settings:
+                    SettingsView()
+                case .eigenvalues:
+                    EigenvaluesView()
+                case .eigenvectors:
+                    EigenvectorsView()
+                case .diagonalization:
+                    DiagonalizationView()
+                case .orthogonality:
+                    OrthogonalityView()
+                case .distanceHyperplane:
+                    DistanceHyperplaneView()
+                case .quadraticCurveFitting:
+                    QuadraticCurveFitView()
+                case .leastSquaresInconsistent, .leastSquaresError, .leastSquaresInfinite, .linearRegression:
+                    Text("Least Squares Module Coming Soon")
+                        .foregroundColor(.secondary)
+                        .padding()
                 }
                 
                 Spacer()
@@ -275,11 +461,14 @@ struct MatrixSetupView: View {
                 .foregroundColor(.secondary)
             
             // Dimensions
-            HStack(spacing: 40) {
-                VStack { Text("Rows: \(matrixData.rows)").font(.headline); Stepper("", value: $matrixData.rows, in: 1...10).labelsHidden() }
-                VStack { Text("Columns: \(matrixData.cols)").font(.headline); Stepper("", value: $matrixData.cols, in: 1...10).labelsHidden() }
+            HStack(spacing: 16) {
+                HStack(spacing: 30) {
+                    VStack { Text("Rows: \(matrixData.rows)").font(.headline); Stepper("", value: $matrixData.rows, in: 1...10).labelsHidden() }
+                    VStack { Text("Columns: \(matrixData.cols)").font(.headline); Stepper("", value: $matrixData.cols, in: 1...10).labelsHidden() }
+                }
+                .padding().background(Color(uiColor: .secondarySystemBackground)).cornerRadius(12)
             }
-            .padding().background(Color(uiColor: .secondarySystemBackground)).cornerRadius(12)
+            .fixedSize(horizontal: false, vertical: true)
             
             Divider()
             
@@ -351,6 +540,81 @@ struct MatrixSetupView: View {
                     SubspaceSummaryRow(title: "Null Space N(A)", basis: matrixData.nullSpace, action: { selectedSection = .nullSpace })
                     SubspaceSummaryRow(title: "Row Space C(Aᵀ)", basis: matrixData.rowSpace, action: { selectedSection = .rowSpace })
                     SubspaceSummaryRow(title: "Left Null Space N(Aᵀ)", basis: matrixData.leftNullSpace, action: { selectedSection = .leftNullSpace })
+                    
+                    if matrixData.rows == matrixData.cols {
+                        Divider()
+                        
+                        // Inverse
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Matrix Inverse A⁻¹").font(.headline)
+                                Spacer()
+                                Button(action: { selectedSection = .inverse }) {
+                                    Text("See Steps")
+                                        .font(.caption).bold()
+                                        .padding(6)
+                                        .background(Color.blue.opacity(0.1))
+                                        .cornerRadius(6)
+                                }
+                            }
+                            
+                            if let inv = matrixData.inverseMatrix {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 0) {
+                                        RoundedRectangle(cornerRadius: 2).frame(width: 2).padding(.vertical, 4)
+                                        VStack(spacing: 4) {
+                                            ForEach(0..<inv.count, id: \.self) { r in
+                                                HStack(spacing: 8) {
+                                                    ForEach(0..<inv[r].count, id: \.self) { c in
+                                                        Text(inv[r][c].description)
+                                                            .font(.system(.caption, design: .monospaced))
+                                                            .frame(width: 60, height: 30, alignment: .center)
+                                                            .minimumScaleFactor(0.4)
+                                                            .lineLimit(1)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .padding(.horizontal, 4)
+                                        RoundedRectangle(cornerRadius: 2).frame(width: 2).padding(.vertical, 4)
+                                    }
+                                    .padding(8)
+                                    .background(Color(uiColor: .tertiarySystemBackground))
+                                    .cornerRadius(8)
+                                }
+                            } else {
+                                Text("Matrix is Singular (No Inverse)")
+                                    .font(.caption)
+                                    .foregroundColor(.orange)
+                                    .padding(.vertical, 4)
+                            }
+                            
+                            Text("Calculated via Gauss-Jordan Elimination").font(.caption).foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, 4)
+                        
+                        Divider()
+                        
+                        // Determinant
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("Determinant |A|").font(.headline)
+                                if let det = matrixData.determinantValue {
+                                    Text("Result: \(det.description)").font(.subheadline).bold().foregroundColor(.primary)
+                                }
+                                Text("Calculated via Cofactor Expansion / Sarrus").font(.caption).foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Button(action: { selectedSection = .determinant }) {
+                                Text("See Steps")
+                                    .font(.caption).bold()
+                                    .padding(6)
+                                    .background(Color.blue.opacity(0.1))
+                                    .cornerRadius(6)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
                 }
                 .padding().background(Color(uiColor: .secondarySystemBackground)).cornerRadius(12)
             }
@@ -383,68 +647,7 @@ struct SubspaceSummaryRow: View {
     }
 }
 
-struct GeometricVisualizationView: View {
-    @EnvironmentObject var matrixData: MatrixData
-    @State private var selectedSubspace: String = "Column Space"
-    
-    var basisVectors: [[Double]] {
-        let basis: [[Fraction]]
-        switch selectedSubspace {
-        case "Column Space": basis = matrixData.columnSpace
-        case "Null Space": basis = matrixData.nullSpace
-        case "Row Space": basis = matrixData.rowSpace
-        case "Left Null Space": basis = matrixData.leftNullSpace
-        default: basis = []
-        }
-        return basis.map { vec in vec.map { $0.asDouble } }
-    }
-    
-    var body: some View {
-        VStack(spacing: 16) {
-            Picker("Subspace", selection: $selectedSubspace) {
-                Text("Column Space").tag("Column Space")
-                Text("Null Space").tag("Null Space")
-                Text("Row Space").tag("Row Space")
-                Text("Left Null Space").tag("Left Null Space")
-            }
-            .pickerStyle(.segmented)
-            .padding(.horizontal)
-            
-            if matrixData.hasComputed {
-                SubspacePlot3D(basisVectors: basisVectors, accentColor: colorForSubspace(selectedSubspace), originalDimension: matrixData.rows)
-                    .frame(height: 750)
-                    .cornerRadius(16)
-                    .padding()
-                
-                Text("Showing basis for \(selectedSubspace)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            } else {
-                VStack {
-                    Image(systemName: "cube.transparent")
-                        .font(.system(size: 50))
-                        .foregroundColor(.gray)
-                    Text("Please compute a matrix first in Matrix Setup.")
-                        .foregroundColor(.secondary)
-                }
-                .frame(height: 300)
-                .frame(maxWidth: .infinity)
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(12)
-            }
-        }
-    }
-    
-    func colorForSubspace(_ name: String) -> Color {
-        switch name {
-        case "Column Space": return .green
-        case "Null Space": return .blue
-        case "Row Space": return .orange
-        case "Left Null Space": return .purple
-        default: return .white
-        }
-    }
-}
+
 
 // MARK: - Reusable Views
 
@@ -472,7 +675,8 @@ struct BasisView: View {
                                 ForEach(0..<vectors[i].count, id: \.self) { j in
                                     Text(vectors[i][j].description)
                                         .font(.system(.body, design: .monospaced))
-                                        .frame(minWidth: 20, alignment: .center)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
                                 }
                             }
                             .padding(8)
@@ -530,8 +734,9 @@ struct MatrixGridView: View {
                         Text(matrix[r][c].description)
                             .font(.system(.body, design: .monospaced))
                             .foregroundColor(.white)
-                            .frame(width: 40, height: 30)
-                            .minimumScaleFactor(0.5)
+                            .frame(width: 60, height: 40)
+                            .minimumScaleFactor(0.4)
+                            .lineLimit(1)
                     }
                 }
             }
@@ -548,126 +753,92 @@ struct IntroductionView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
                 // Hero Section
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("The Four Fundamental Subspaces")
-                        .font(.system(size: 48, weight: .bold, design: .serif))
-                        .foregroundColor(.primary)
-                        .padding(.top, 20)
+                VStack(alignment: .center, spacing: 16) {
+                    Image(systemName: "cube.transparent")
+                        .font(.system(size: 60))
+                        .foregroundStyle(LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing))
+                        .padding(.bottom, 8)
                     
-                    Text("Unveiling the geometry of Linear Algebra")
+                    Text("VectorLens")
+                        .font(.system(size: 42, weight: .bold, design: .serif))
+                        .foregroundColor(.primary)
+                    
+                    Text("Interactive Linear Algebra")
                         .font(.system(size: 24, design: .serif))
                         .italic()
                         .foregroundColor(.secondary)
                     
-                    // Fundamental Theorem Visual
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(LinearGradient(
-                                gradient: Gradient(colors: [Color.blue.opacity(0.1), Color.purple.opacity(0.1)]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 20)
-                                    .stroke(LinearGradient(colors: [.blue.opacity(0.3), .purple.opacity(0.3)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
-                            )
+                    Text("Visualize, Compute, and Understand")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 4)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 40)
+                .background(Color(uiColor: .secondarySystemBackground))
+                .cornerRadius(20)
+                
+                // Features Grid
+                VStack(alignment: .leading, spacing: 24) {
+                    Text("What's Inside")
+                        .font(.title2)
+                        .bold()
+                    
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 300))], spacing: 20) {
+                        FeatureCard(
+                            icon: "square.grid.3x3.fill",
+                            title: "Matrix Operations",
+                            description: "Perform RREF, Inverse (Gauss-Jordan), and Determinant (Cofactor & Sarrus) calculations with step-by-step explanations.",
+                            color: .blue
+                        )
                         
-                        VStack(spacing: 20) {
-                            Text("The Fundamental Theorem of Linear Algebra")
-                                .font(.system(size: 20, weight: .semibold, design: .serif))
-                                .foregroundColor(.primary)
-                            
-                            HStack(spacing: 40) {
-                                VStack {
-                                    MathText(text: "C(A)", size: 32, color: .green)
-                                    MathText(text: "dim = r", size: 16, color: .secondary)
-                                }
-                                
-                                Image(systemName: "arrow.left.and.right")
-                                    .font(.title2)
-                                    .foregroundColor(.secondary)
-                                
-                                VStack {
-                                    MathText(text: "C(Aᵀ)", size: 32, color: .orange)
-                                    MathText(text: "dim = r", size: 16, color: .secondary)
-                                }
-                            }
-                            
-                            Divider().padding(.horizontal, 40)
-                            
-                            HStack(spacing: 40) {
-                                VStack {
-                                    MathText(text: "N(A)", size: 32, color: .blue)
-                                    MathText(text: "dim = n - r", size: 16, color: .secondary)
-                                }
-                                
-                                Text("⊥")
-                                    .font(.system(size: 32, weight: .bold, design: .serif))
-                                    .foregroundColor(.secondary)
-                                
-                                VStack {
-                                    MathText(text: "C(Aᵀ)", size: 32, color: .orange)
-                                    MathText(text: "Row Space", size: 14, color: .secondary)
-                                }
-                            }
-                            
-                            Text("Orthogonal Complements in Rⁿ")
-                                .font(.system(size: 14, design: .serif))
-                                .italic()
-                                .foregroundColor(.secondary)
-                        }
-                        .padding(30)
+                        FeatureCard(
+                            icon: "function",
+                            title: "Eigen Theory",
+                            description: "Find Eigenvalues via Characteristic Polynomial and Eigenvectors via Null Space basis. Diagonalize matrices (PDP⁻¹) and verify results.",
+                            color: .purple
+                        )
+                        
+                        FeatureCard(
+                            icon: "angle",
+                            title: "Inner Product & Orthogonality",
+                            description: "Explore dot products, norms, angles, distance, and verify orthogonal sets. Visual step-by-step breakdown.",
+                            color: .red
+                        )
+                        
+                        FeatureCard(
+                            icon: "chart.line.uptrend.xyaxis",
+                            title: "Least Squares",
+                            description: "Perform Quadratic Curve Fitting and calculate Distance to Hyperplanes using Least Squares and Projection methods.",
+                            color: .pink
+                        )
+                        
+                        FeatureCard(
+                            icon: "square.stack.3d.up",
+                            title: "Fundamental Subspaces",
+                            description: "Visualize the Four Fundamental Subspaces: Column Space, Null Space, Row Space, and Left Null Space.",
+                            color: .green
+                        )
+                        
+                        FeatureCard(
+                            icon: "cube.transparent",
+                            title: "Geometric Visualization",
+                            description: "Interactive 3D visualization of vectors and subspaces to build geometric intuition.",
+                            color: .orange
+                        )
                     }
                 }
                 
-                Text("Explore the Subspaces")
-                    .font(.system(size: 28, weight: .bold, design: .serif))
-                    .padding(.top, 10)
-                
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 300), spacing: 20)], spacing: 20) {
-                    SubspaceCard(
-                        symbol: "C(A)",
-                        name: "Column Space",
-                        description: "The space spanned by the columns of A. Represents all possible outputs of the transformation.",
-                        color: .green,
-                        icon: "arrow.up.right.square.fill"
-                    )
-                    
-                    SubspaceCard(
-                        symbol: "N(A)",
-                        name: "Null Space",
-                        description: "The set of all vectors x such that Ax = 0. Represents the kernel of the transformation.",
-                        color: .blue,
-                        icon: "circle.dashed.inset.filled"
-                    )
-                    
-                    SubspaceCard(
-                        symbol: "C(Aᵀ)",
-                        name: "Row Space",
-                        description: "The space spanned by the rows of A. It is the orthogonal complement of the Null Space.",
-                        color: .orange,
-                        icon: "tablecells.fill"
-                    )
-                    
-                    SubspaceCard(
-                        symbol: "N(Aᵀ)",
-                        name: "Left Null Space",
-                        description: "The null space of Aᵀ. It is the orthogonal complement of the Column Space.",
-                        color: .purple,
-                        icon: "arrow.uturn.left.square.fill"
-                    )
-                }
-                
-                // Instructions
-                VStack(alignment: .leading, spacing: 20) {
-                    Text("How to use this app")
-                        .font(.system(size: 28, weight: .bold, design: .serif))
+                // Getting Started
+                VStack(alignment: .leading, spacing: 24) {
+                    Text("Getting Started")
+                        .font(.title2)
+                        .bold()
                     
                     VStack(alignment: .leading, spacing: 16) {
-                        InstructionRow(number: "1", text: "Go to 'Matrix Setup' to define your matrix dimensions and values.")
-                        InstructionRow(number: "2", text: "Tap 'Compute' to calculate the RREF and derived subspaces.")
-                        InstructionRow(number: "3", text: "Explore each subspace detail view to see the basis vectors and mathematical derivation.")
-                        InstructionRow(number: "4", text: "Visit 'Geometric Visualization' to see these spaces in 3D (for 3x3 matrices).")
+                        InstructionRow(number: "1", text: "Go to 'Matrix Setup' to define your matrix A.")
+                        InstructionRow(number: "2", text: "Tap 'Compute' to generate all derived properties.")
+                        InstructionRow(number: "3", text: "Navigate through the topics to see detailed step-by-step derivations.")
                     }
                     .padding()
                     .background(Color(uiColor: .secondarySystemBackground))
@@ -682,52 +853,35 @@ struct IntroductionView: View {
     }
 }
 
-struct MathText: View {
-    let text: String
-    let size: CGFloat
-    let color: Color
-    
-    var body: some View {
-        Text(text)
-            .font(.system(size: size, weight: .medium, design: .serif))
-            .foregroundColor(color)
-    }
-}
-
-struct SubspaceCard: View {
-    let symbol: String
-    let name: String
+struct FeatureCard: View {
+    let icon: String
+    let title: String
     let description: String
     let color: Color
-    let icon: String
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: icon)
                     .font(.title)
                     .foregroundColor(color)
                 Spacer()
-                Text(symbol)
-                    .font(.system(size: 24, weight: .bold, design: .serif))
-                    .foregroundColor(color)
             }
             
-            Text(name)
-                .font(.system(size: 20, weight: .bold, design: .serif))
-                .foregroundColor(.primary)
+            Text(title)
+                .font(.headline)
+                .bold()
             
             Text(description)
-                .font(.system(size: 16, design: .serif))
+                .font(.subheadline)
                 .foregroundColor(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
-                .lineLimit(3)
         }
-        .padding(24)
-        .background(Color(uiColor: .secondarySystemBackground))
-        .cornerRadius(20)
+        .padding()
+        .background(Color(uiColor: .tertiarySystemBackground))
+        .cornerRadius(12)
         .overlay(
-            RoundedRectangle(cornerRadius: 20)
+            RoundedRectangle(cornerRadius: 12)
                 .stroke(color.opacity(0.3), lineWidth: 1)
         )
     }
@@ -1428,3 +1582,6 @@ extension String.StringInterpolation {
         appendLiteral(result)
     }
 }
+
+
+

@@ -81,6 +81,10 @@ struct SubspacePlot3D: View {
     let accentColor: Color
     let originalDimension: Int
     
+    var mode: String = "Subspace"
+    var inputVector: Vec3 = .zero
+    var matrix: [[Double]] = []
+    
     @State private var rotation: (rx: Double, ry: Double, rz: Double) = (-0.55, 0.75, 0)
     @State private var zoom: Double = 1.0
     @State private var lastZoom: Double = 1.0
@@ -374,6 +378,27 @@ struct SubspacePlot3D: View {
                 
                 // 5. Subspace Visualization
                 
+                if mode == "Transformation" {
+                    drawArrowClipped(Vec3(0,0,0), inputVector, color: .blue, width: 3, headPx: 10)
+                    let xLabel = String(format: "x(%.1f, %.1f, %.1f)", inputVector.x, inputVector.y, inputVector.z)
+                    drawText(inputVector, xLabel, color: .blue)
+                    
+                    if !matrix.isEmpty {
+                        let r = matrix.count
+                        let c = matrix[0].count
+                        let x = inputVector.x, y = inputVector.y, z = inputVector.z
+                        
+                        let ax = (c > 0 ? matrix[0][0]*x : 0) + (c > 1 ? matrix[0][1]*y : 0) + (c > 2 ? matrix[0][2]*z : 0)
+                        let ay = r > 1 ? ((c > 0 ? matrix[1][0]*x : 0) + (c > 1 ? matrix[1][1]*y : 0) + (c > 2 ? matrix[1][2]*z : 0)) : 0
+                        let az = r > 2 ? ((c > 0 ? matrix[2][0]*x : 0) + (c > 1 ? matrix[2][1]*y : 0) + (c > 2 ? matrix[2][2]*z : 0)) : 0
+                        
+                        let Ax = Vec3(ax, ay, az)
+                        drawArrowClipped(Vec3(0,0,0), Ax, color: .red, width: 3, headPx: 10)
+                        let axLabel = String(format: "Ax(%.1f, %.1f, %.1f)", ax, ay, az)
+                        drawText(Ax, axLabel, color: .red)
+                    }
+                }
+                
                 // Plane (Dim 2)
                 if dim == 2 && nonZero.count >= 2 {
                     let u0 = normalize(nonZero[0])
@@ -532,6 +557,212 @@ struct ToggleBtn: View {
                 .foregroundColor(isOn ? .white : .white.opacity(0.6))
                 .cornerRadius(4)
                 .overlay(RoundedRectangle(cornerRadius: 4).stroke(Color.white.opacity(0.2)))
+        }
+    }
+}
+
+struct GeometricVisualizationView: View {
+    @EnvironmentObject var matrixData: MatrixData
+    @State private var selectedSubspace: String = "Column Space"
+    
+    // Transformation Mode State
+    @State private var inputVector: Vec3 = Vec3(1, 1, 0)
+    @State private var isNullSpaceFound: Bool = false
+    
+    var basisVectors: [[Double]] {
+        let basis: [[Fraction]]
+        switch selectedSubspace {
+        case "Column Space": basis = matrixData.columnSpace
+        case "Null Space": basis = matrixData.nullSpace
+        case "Row Space": basis = matrixData.rowSpace
+        case "Left Null Space": basis = matrixData.leftNullSpace
+        case "Transformation": return []
+        default: basis = []
+        }
+        return basis.map { vec in vec.map { $0.asDouble } }
+    }
+    
+    func checkNullSpace() {
+        let matrix = matrixData.getFractionMatrix().map { row in row.map { $0.asDouble } }
+        let r = matrix.count
+        let c = matrix.isEmpty ? 0 : matrix[0].count
+        let x = inputVector.x, y = inputVector.y, z = inputVector.z
+        
+        let ax = (c > 0 ? matrix[0][0]*x : 0) + (c > 1 ? matrix[0][1]*y : 0) + (c > 2 ? matrix[0][2]*z : 0)
+        let ay = r > 1 ? ((c > 0 ? matrix[1][0]*x : 0) + (c > 1 ? matrix[1][1]*y : 0) + (c > 2 ? matrix[1][2]*z : 0)) : 0
+        let az = r > 2 ? ((c > 0 ? matrix[2][0]*x : 0) + (c > 1 ? matrix[2][1]*y : 0) + (c > 2 ? matrix[2][2]*z : 0)) : 0
+        
+        let outputLen = sqrt(ax*ax + ay*ay + az*az)
+        let inputLen = sqrt(x*x + y*y + z*z)
+        
+        // Null space detection: input is non-zero, output is near zero
+        if inputLen > 0.1 && outputLen < 0.2 {
+            if !isNullSpaceFound {
+                SoundManager.shared.playNullSpaceDiscovery()
+                isNullSpaceFound = true
+            }
+        } else {
+            isNullSpaceFound = false
+        }
+    }
+    
+    func colorForSubspace(_ name: String) -> Color {
+        switch name {
+        case "Column Space": return .green
+        case "Null Space": return .blue
+        case "Row Space": return .orange
+        case "Left Null Space": return .purple
+        case "Transformation": return .white
+        default: return .white
+        }
+    }
+    
+    // Computed property for output vector
+    var outputVector: Vec3 {
+        let matrix = matrixData.getFractionMatrix().map { row in row.map { $0.asDouble } }
+        let r = matrix.count
+        let c = matrix.isEmpty ? 0 : matrix[0].count
+        let x = inputVector.x, y = inputVector.y, z = inputVector.z
+        
+        let ax = (c > 0 ? matrix[0][0]*x : 0) + (c > 1 ? matrix[0][1]*y : 0) + (c > 2 ? matrix[0][2]*z : 0)
+        let ay = r > 1 ? ((c > 0 ? matrix[1][0]*x : 0) + (c > 1 ? matrix[1][1]*y : 0) + (c > 2 ? matrix[1][2]*z : 0)) : 0
+        let az = r > 2 ? ((c > 0 ? matrix[2][0]*x : 0) + (c > 1 ? matrix[2][1]*y : 0) + (c > 2 ? matrix[2][2]*z : 0)) : 0
+        
+        return Vec3(ax, ay, az)
+    }
+    
+    var modeTitle: String {
+        switch selectedSubspace {
+        case "Transformation": return "Vector Transformation"
+        case "Column Space": return "Column Space C(A)"
+        case "Null Space": return "Null Space N(A)"
+        case "Row Space": return "Row Space C(Aᵀ)"
+        case "Left Null Space": return "Left Null Space N(Aᵀ)"
+        default: return "3D Visualization"
+        }
+    }
+    
+    var body: some View {
+        VStack(spacing: 16) {
+            // Header with Title and Mode Menu
+            HStack {
+                Text(modeTitle)
+                    .font(.title2)
+                    .bold()
+                
+                Spacer()
+                
+                Menu {
+                    Picker("Mode", selection: $selectedSubspace) {
+                        Label("Transformation", systemImage: "arrow.right.arrow.left").tag("Transformation")
+                        Divider()
+                        Label("Column Space", systemImage: "arrow.up.and.down").tag("Column Space")
+                        Label("Null Space", systemImage: "circle.slash").tag("Null Space")
+                        Label("Row Space", systemImage: "arrow.left.and.right").tag("Row Space")
+                        Label("Left Null Space", systemImage: "arrow.up.left.and.arrow.down.right").tag("Left Null Space")
+                    }
+                } label: {
+                    HStack {
+                        Image(systemName: "line.3.horizontal.decrease.circle")
+                        Text("Mode")
+                    }
+                    .padding(8)
+                    .background(Color.blue.opacity(0.1))
+                    .cornerRadius(8)
+                }
+            }
+            .padding(.horizontal)
+            
+            if matrixData.hasComputed {
+                ZStack(alignment: .bottomTrailing) {
+                    SubspacePlot3D(
+                        basisVectors: basisVectors,
+                        accentColor: colorForSubspace(selectedSubspace),
+                        originalDimension: matrixData.rows,
+                        mode: selectedSubspace,
+                        inputVector: inputVector,
+                        matrix: matrixData.getFractionMatrix().map { row in row.map { $0.asDouble } }
+                    )
+                    .frame(height: 500)
+                    .cornerRadius(16)
+                    .padding()
+                    
+                    if selectedSubspace == "Transformation" {
+                        // Vector Values HUD
+                        HStack(spacing: 16) {
+                            VectorValueView(title: "Input x", vector: inputVector, color: .blue)
+                            Image(systemName: "arrow.right").foregroundColor(.white.opacity(0.6))
+                            VectorValueView(title: "Output Ax", vector: outputVector, color: .red)
+                        }
+                        .padding(12)
+                        .background(Color.black.opacity(0.7))
+                        .cornerRadius(12)
+                        .padding(24)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        
+                        // Legend
+                        VStack(alignment: .trailing, spacing: 4) {
+                            HStack { Circle().fill(Color.blue).frame(width: 8, height: 8); Text("Input x").font(.caption).foregroundColor(.white) }
+                            HStack { Circle().fill(Color.red).frame(width: 8, height: 8); Text("Output Ax").font(.caption).foregroundColor(.white) }
+                        }
+                        .padding(8)
+                        .background(Color.black.opacity(0.6))
+                        .cornerRadius(8)
+                        .padding(24)
+                    }
+                }
+                
+                if selectedSubspace == "Transformation" {
+                    VStack(spacing: 12) {
+                        Text("Transform Vector x")
+                            .font(.headline)
+                        
+                        HStack {
+                            Text("x₁").bold().frame(width: 25)
+                            Slider(value: $inputVector.x, in: -3...3)
+                                .onChange(of: inputVector.x) { _ in checkNullSpace() }
+                            Text(String(format: "%.1f", inputVector.x)).monospacedDigit().frame(width: 35)
+                        }
+                        HStack {
+                            Text("x₂").bold().frame(width: 25)
+                            Slider(value: $inputVector.y, in: -3...3)
+                                .onChange(of: inputVector.y) { _ in checkNullSpace() }
+                            Text(String(format: "%.1f", inputVector.y)).monospacedDigit().frame(width: 35)
+                        }
+                        if matrixData.cols > 2 {
+                            HStack {
+                                Text("x₃").bold().frame(width: 25)
+                                Slider(value: $inputVector.z, in: -3...3)
+                                    .onChange(of: inputVector.z) { _ in checkNullSpace() }
+                                Text(String(format: "%.1f", inputVector.z)).monospacedDigit().frame(width: 35)
+                            }
+                        }
+                        
+                        if isNullSpaceFound {
+                            Text("Null Space Found! Ax ≈ 0")
+                                .font(.caption).bold()
+                                .foregroundColor(.green)
+                                .padding(8)
+                                .background(Color.green.opacity(0.1))
+                                .cornerRadius(8)
+                                .transition(.scale)
+                        } else {
+                            Text("Drag x to explore.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom)
+                } else {
+                    Text("Showing basis for \(selectedSubspace)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                Text("Enter a matrix to visualize.")
+                    .foregroundColor(.secondary)
+            }
         }
     }
 }
