@@ -122,6 +122,14 @@ struct DetailView: View {
                     RefRrefView()
                 case .gaussJordan:
                     GaussJordanView()
+                case .inverse2x2Formula:
+                    Inverse2x2FormulaView()
+                case .inverseGaussJordan:
+                    InverseGaussJordanView()
+                case .solveWithInverse:
+                    SolveWithInverseView()
+                case .elementaryMatrices:
+                    ElementaryMatricesView()
                 }
                 
                 Spacer()

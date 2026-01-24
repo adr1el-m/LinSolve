@@ -83,7 +83,28 @@ struct ContentView: View {
                         }
                     )
                     
-                    // 6. Dot Products and Orthogonality
+                    // 6. Nonsingular Matrices
+                    DisclosureGroup(
+                        content: {
+                            NavigationLink(value: AppSection.inverse2x2Formula) {
+                                Label("2×2 Inverse Formula", systemImage: AppSection.inverse2x2Formula.iconName)
+                            }
+                            NavigationLink(value: AppSection.inverseGaussJordan) {
+                                Label("Inverse via Gauss-Jordan", systemImage: AppSection.inverseGaussJordan.iconName)
+                            }
+                            NavigationLink(value: AppSection.solveWithInverse) {
+                                Label("Solve with Inverse", systemImage: AppSection.solveWithInverse.iconName)
+                            }
+                            NavigationLink(value: AppSection.elementaryMatrices) {
+                                Label("Elementary Matrices", systemImage: AppSection.elementaryMatrices.iconName)
+                            }
+                        },
+                        label: {
+                            Label("Nonsingular Matrices", systemImage: "square.fill.on.square.fill")
+                        }
+                    )
+                    
+                    // 7. Dot Products and Orthogonality
                     DisclosureGroup(
                         content: {
                             NavigationLink(value: AppSection.dotProductApplication) {
