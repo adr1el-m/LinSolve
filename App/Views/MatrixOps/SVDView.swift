@@ -26,38 +26,39 @@ struct SVDView: View {
                         Text("Decomposition")
                             .font(.headline)
                         
-                        HStack(alignment: .top, spacing: 10) {
-                            VStack {
-                                Text("U")
-                                    .font(.caption)
-                                StringMatrixGrid(matrix: result.U)
-                            }
-                            
-                            Text("×")
-                                .font(.title)
-                                .padding(.top, 30)
-                            
-                            VStack {
-                                Text("Σ")
-                                    .font(.caption)
-                                let m = matrix.count
-                                let n = matrix[0].count
-                                let sigmaMatrix = makeSigmaMatrix(sigmas: result.Sigma, m: m, n: n)
-                                StringMatrixGrid(matrix: sigmaMatrix)
-                            }
-                            
-                            Text("×")
-                                .font(.title)
-                                .padding(.top, 30)
-                            
-                            VStack {
-                                Text("Vᵀ")
-                                    .font(.caption)
-                                let VT = transposeStringMatrix(result.V)
-                                StringMatrixGrid(matrix: VT)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(alignment: .top, spacing: 10) {
+                                VStack {
+                                    Text("U")
+                                        .font(.caption)
+                                    StringMatrixGrid(matrix: result.U)
+                                }
+                                
+                                Text("×")
+                                    .font(.title)
+                                    .padding(.top, 30)
+                                
+                                VStack {
+                                    Text("Σ")
+                                        .font(.caption)
+                                    let m = matrix.count
+                                    let n = matrix[0].count
+                                    let sigmaMatrix = makeSigmaMatrix(sigmas: result.Sigma, m: m, n: n)
+                                    StringMatrixGrid(matrix: sigmaMatrix)
+                                }
+                                
+                                Text("×")
+                                    .font(.title)
+                                    .padding(.top, 30)
+                                
+                                VStack {
+                                    Text("Vᵀ")
+                                        .font(.caption)
+                                    let VT = transposeStringMatrix(result.V)
+                                    StringMatrixGrid(matrix: VT)
+                                }
                             }
                         }
-                        .scroll(.horizontal)
                         
                         Text("A = UΣVᵀ")
                             .font(.caption)
