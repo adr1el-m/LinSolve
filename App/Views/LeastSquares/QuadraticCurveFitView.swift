@@ -16,9 +16,16 @@ struct QuadraticCurveFitView: View {
         PointData(x: 2, y: 4)
     ]
     
-    @State private var steps: [LeastSquaresStep] = []
     @State private var resultEquation: String = ""
     @State private var coefficients: [Double] = []
+    
+    // Computation Results for Display
+    @State private var displayMatrixA: [[Fraction]] = []
+    @State private var displayVectorY: [[Fraction]] = []
+    @State private var displayATA: [[Fraction]] = []
+    @State private var displayATy: [[Fraction]] = []
+    @State private var displayP: [[Fraction]] = []
+    @State private var showSteps: Bool = false
     
     var body: some View {
         ScrollView {
@@ -71,28 +78,96 @@ struct QuadraticCurveFitView: View {
                         .cornerRadius(10)
                 }
                 
-                if !steps.isEmpty {
+                if showSteps {
                     VStack(alignment: .leading, spacing: 15) {
                         Text("Solution Steps")
                             .font(.title2)
                             .bold()
                         
-                        ForEach(steps) { step in
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(step.title)
-                                    .font(.headline)
-                                Text(step.description)
-                                    .font(.body)
-                                    .foregroundColor(.secondary)
-                                if !step.latex.isEmpty {
-                                    MathText(latex: step.latex)
-                                        .frame(height: step.latexHeight)
+                        // Step 1: Setup
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("1. Setup System")
+                                .font(.headline)
+                            Text("We fit y = a₀ + a₁x + a₂x² by solving Ap = y where p = [a₀, a₁, a₂]ᵀ.")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                            
+                            HStack(alignment: .top, spacing: 20) {
+                                VStack {
+                                    Text("A =")
+                                    MatrixPreviewView(matrix: displayMatrixA)
+                                }
+                                VStack {
+                                    Text("y =")
+                                    MatrixPreviewView(matrix: displayVectorY)
                                 }
                             }
-                            .padding()
-                            .background(Color(uiColor: .secondarySystemBackground))
-                            .cornerRadius(8)
+                            .padding(.top, 4)
                         }
+                        .padding()
+                        .background(Color(uiColor: .secondarySystemBackground))
+                        .cornerRadius(8)
+                        
+                        // Step 2: Normal Equation
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("2. Normal Equation")
+                                .font(.headline)
+                            Text("Compute AᵀA and Aᵀy for the normal equation AᵀAp = Aᵀy.")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                            
+                            VStack(alignment: .leading, spacing: 15) {
+                                HStack {
+                                    Text("AᵀA =")
+                                    MatrixPreviewView(matrix: displayATA)
+                                }
+                                HStack {
+                                    Text("Aᵀy =")
+                                    MatrixPreviewView(matrix: displayATy)
+                                }
+                            }
+                            .padding(.top, 4)
+                        }
+                        .padding()
+                        .background(Color(uiColor: .secondarySystemBackground))
+                        .cornerRadius(8)
+                        
+                        // Step 3: Solve
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("3. Solve for p")
+                                .font(.headline)
+                            Text("p = (AᵀA)⁻¹ Aᵀy")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                            
+                            HStack {
+                                Text("p =")
+                                MatrixPreviewView(matrix: displayP)
+                            }
+                            .padding(.top, 4)
+                        }
+                        .padding()
+                        .background(Color(uiColor: .secondarySystemBackground))
+                        .cornerRadius(8)
+                        
+                        // Step 4: Result
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("4. Result")
+                                .font(.headline)
+                            Text("The quadratic function that fits the data is:")
+                                .font(.body)
+                                .foregroundColor(.secondary)
+                            
+                            Text(resultEquation)
+                                .font(.system(.title3, design: .serif))
+                                .bold()
+                                .padding()
+                                .background(Color.blue.opacity(0.1))
+                                .cornerRadius(8)
+                        }
+                        .padding()
+                        .background(Color(uiColor: .secondarySystemBackground))
+                        .cornerRadius(8)
                         
                         if !coefficients.isEmpty {
                             Text("Visualization")
@@ -171,8 +246,6 @@ struct QuadraticCurveFitView: View {
             let y = p.y
             
             // Row: 1, x, x^2
-            // We need to convert Double to Fraction.
-            // For educational purposes, let's try to keep them simple if they are integers
             matrixA.append([
                 Fraction(1),
                 Fraction(string: "\(x)"),
@@ -182,19 +255,8 @@ struct QuadraticCurveFitView: View {
             vectorY.append([Fraction(string: "\(y)")])
         }
         
-        // Steps
-        var computedSteps: [LeastSquaresStep] = []
-        
-        // 1. Show A and y
-        let aLatex = matrixToLatex(matrixA)
-        let yLatex = matrixToLatex(vectorY)
-        
-        computedSteps.append(LeastSquaresStep(
-            title: "1. Setup System",
-            description: "We fit y = a₀ + a₁x + a₂x² by solving Ap = y where p = [a₀, a₁, a₂]ᵀ.",
-            latex: "A = \\\\begin{bmatrix} \(aLatex) \\\\end{bmatrix}, \\\\vec{y} = \\\\begin{bmatrix} \(yLatex) \\\\end{bmatrix}",
-            latexHeight: 150
-        ))
+        self.displayMatrixA = matrixA
+        self.displayVectorY = vectorY
         
         // 2. Normal Equation
         // A^T A p = A^T y
@@ -202,21 +264,13 @@ struct QuadraticCurveFitView: View {
         let aTa = MatrixEngine.multiply(matrixA: aT, matrixB: matrixA)
         let aTy = MatrixEngine.multiply(matrixA: aT, matrixB: vectorY)
         
-
-        let aTaLatex = matrixToLatex(aTa)
-        let aTyLatex = matrixToLatex(aTy)
-        
-        computedSteps.append(LeastSquaresStep(
-            title: "2. Normal Equation",
-            description: "Compute AᵀA and Aᵀy for the normal equation AᵀAp = Aᵀy.",
-            latex: "\\\\begin{aligned} A^T A &= \\\\begin{bmatrix} \(aTaLatex) \\\\end{bmatrix} \\\\\\\\ A^T \\\\vec{y} &= \\\\begin{bmatrix} \(aTyLatex) \\\\end{bmatrix} \\\\end{aligned}",
-            latexHeight: 160
-        ))
+        self.displayATA = aTa
+        self.displayATy = aTy
         
         // 3. Solve
         if let invAtA = MatrixEngine.inverse(aTa) {
             let p = MatrixEngine.multiply(matrixA: invAtA, matrixB: aTy)
-            let pLatex = matrixToLatex(p)
+            self.displayP = p
             
             let a0 = p[0][0].asDouble
             let a1 = p[1][0].asDouble
@@ -224,49 +278,14 @@ struct QuadraticCurveFitView: View {
             
             self.coefficients = [a0, a1, a2]
             
-            computedSteps.append(LeastSquaresStep(
-                title: "3. Solve for p",
-                description: "p = (AᵀA)⁻¹ Aᵀy",
-                latex: "\\\\vec{p} = \\\\begin{bmatrix} \(pLatex) \\\\end{bmatrix} = \\\\begin{bmatrix} \(String(format: "%.4f", a0)) \\\\\\\\ \(String(format: "%.4f", a1)) \\\\\\\\ \(String(format: "%.4f", a2)) \\\\end{bmatrix}",
-                latexHeight: 100
-            ))
-            
-            let eq = "y = \(String(format: "%.4f", a0)) + \(String(format: "%.4f", a1))x + \(String(format: "%.4f", a2))x^2"
+            let eq = "y = \(String(format: "%.4f", a0)) + \(String(format: "%.4f", a1))x + \(String(format: "%.4f", a2))x²"
             self.resultEquation = eq
-            
-            computedSteps.append(LeastSquaresStep(
-                title: "4. Result",
-                description: "The quadratic function that fits the data is:",
-                latex: eq,
-                latexHeight: 40
-            ))
+            self.showSteps = true
             
         } else {
-            computedSteps.append(LeastSquaresStep(
-                title: "Error",
-                description: "AᵀA is not invertible. No unique solution.",
-                latex: "",
-                latexHeight: 20
-            ))
+            self.resultEquation = "Error: AᵀA is singular."
+            self.coefficients = []
+            self.showSteps = true
         }
-        
-        self.steps = computedSteps
     }
-    
-    func matrixToLatex(_ m: [[Fraction]]) -> String {
-        var rows: [String] = []
-        for row in m {
-            let rowStr = row.map { $0.description }.joined(separator: " & ")
-            rows.append(rowStr)
-        }
-        return rows.joined(separator: " \\\\ ")
-    }
-}
-
-struct LeastSquaresStep: Identifiable {
-    let id = UUID()
-    let title: String
-    let description: String
-    let latex: String
-    let latexHeight: CGFloat
 }
