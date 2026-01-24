@@ -83,7 +83,6 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .leastSquaresInfinite: return "infinity"
         case .linearRegression: return "chart.xyaxis.line"
         case .quadraticCurveFitting: return "chart.line.uptrend.xyaxis"
-        case .geometric: return "cube.transparent"
         case .transformation2D: return "square.grid.2x2"
         case .rankNullity: return "chart.bar.doc.horizontal"
         case .settings: return "gear"

@@ -27,24 +27,25 @@ struct LUDecompositionView: View {
                         Text("Decomposition")
                             .font(.headline)
                         
-                        HStack(alignment: .top, spacing: 10) {
-                            VStack {
-                                Text("L (Lower)")
-                                    .font(.caption)
-                                MatrixGridView(matrix: result.L)
-                            }
-                            
-                            Text("×")
-                                .font(.title)
-                                .padding(.top, 30)
-                            
-                            VStack {
-                                Text("U (Upper)")
-                                    .font(.caption)
-                                MatrixGridView(matrix: result.U)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(alignment: .top, spacing: 10) {
+                                VStack {
+                                    Text("L (Lower)")
+                                        .font(.caption)
+                                    MatrixGridView(matrix: result.L)
+                                }
+                                
+                                Text("×")
+                                    .font(.title)
+                                    .padding(.top, 30)
+                                
+                                VStack {
+                                    Text("U (Upper)")
+                                        .font(.caption)
+                                    MatrixGridView(matrix: result.U)
+                                }
                             }
                         }
-                        .scroll(.horizontal)
                         
                         Text("A = LU")
                             .font(.caption)
@@ -59,7 +60,7 @@ struct LUDecompositionView: View {
                         Text("Row Reduction Steps")
                             .font(.headline)
                         
-                        ForEach(result.steps) { step in
+                        ForEach(result.steps, id: \.id) { step in
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(step.title)
                                     .font(.subheadline)

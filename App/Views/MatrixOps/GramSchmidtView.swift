@@ -34,24 +34,25 @@ struct GramSchmidtView: View {
                         Text("QR Decomposition")
                             .font(.headline)
                         
-                        HStack(alignment: .top, spacing: 10) {
-                            VStack {
-                                Text("Q (Orthonormal)")
-                                    .font(.caption)
-                                StringMatrixGrid(matrix: result.Q)
-                            }
-                            
-                            Text("×")
-                                .font(.title)
-                                .padding(.top, 30)
-                            
-                            VStack {
-                                Text("R (Upper Triangular)")
-                                    .font(.caption)
-                                StringMatrixGrid(matrix: result.R)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(alignment: .top, spacing: 10) {
+                                VStack {
+                                    Text("Q (Orthonormal)")
+                                        .font(.caption)
+                                    StringMatrixGrid(matrix: result.Q)
+                                }
+                                
+                                Text("×")
+                                    .font(.title)
+                                    .padding(.top, 30)
+                                
+                                VStack {
+                                    Text("R (Upper Triangular)")
+                                        .font(.caption)
+                                    StringMatrixGrid(matrix: result.R)
+                                }
                             }
                         }
-                        .scroll(.horizontal)
                         
                         Text("A = QR")
                             .font(.caption)
@@ -66,17 +67,18 @@ struct GramSchmidtView: View {
                         Text("Orthogonal Basis (Unnormalized)")
                             .font(.headline)
                         
-                        HStack(spacing: 20) {
-                            ForEach(0..<result.orthogonalBasis.count, id: \.self) { i in
-                                VStack {
-                                    Text("v\(i+1)'")
-                                        .font(.caption)
-                                        .italic()
-                                    VectorColumnView(vector: result.orthogonalBasis[i], color: .purple)
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 20) {
+                                ForEach(0..<result.orthogonalBasis.count, id: \.self) { i in
+                                    VStack {
+                                        Text("v\(i+1)'")
+                                            .font(.caption)
+                                            .italic()
+                                        VectorColumnView(vector: result.orthogonalBasis[i], color: .purple)
+                                    }
                                 }
                             }
                         }
-                        .scroll(.horizontal)
                     }
                     .padding()
                     

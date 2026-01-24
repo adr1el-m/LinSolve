@@ -1605,6 +1605,7 @@ class MatrixEngine {
         let id = UUID()
         let title: String
         let description: String
+        let latex: String
         let matrixL: [[Fraction]]
         let matrixU: [[Fraction]]
     }
@@ -1617,17 +1618,22 @@ class MatrixEngine {
         var L = Array(repeating: Array(repeating: Fraction.zero, count: n), count: n)
         var U = matrix
         
+        // Helper to format matrix for latex
+        func matLatex(_ mat: [[Fraction]]) -> String {
+            return "\\begin{bmatrix} " + mat.map { row in row.map { $0.description }.joined(separator: " & ") }.joined(separator: "\\\\ ") + " \\end{bmatrix}"
+        }
+        
         // Initialize L diagonal to 1
         for i in 0..<n { L[i][i] = .one }
         
-        steps.append(LUStep(title: "Start", description: "Initialize L = I and U = A.", matrixL: L, matrixU: U))
+        steps.append(LUStep(title: "Start", description: "Initialize L = I and U = A.", latex: "L = " + matLatex(L) + ", \\quad U = " + matLatex(U), matrixL: L, matrixU: U))
         
         for k in 0..<n-1 {
             // Pivot U[k][k]
             let pivot = U[k][k]
             if pivot == .zero {
                 // Handle zero pivot (Basic implementation: just stop or skip)
-                steps.append(LUStep(title: "Zero Pivot", description: "Pivot at (\(k+1),\(k+1)) is zero. LU decomposition without permutation requires non-zero pivots.", matrixL: L, matrixU: U))
+                steps.append(LUStep(title: "Zero Pivot", description: "Pivot at (\(k+1),\(k+1)) is zero. LU decomposition without permutation requires non-zero pivots.", latex: "\\text{Zero pivot encountered at } (" + String(k+1) + "," + String(k+1) + ")", matrixL: L, matrixU: U))
                 return (steps, L, U)
             }
             
@@ -1645,6 +1651,7 @@ class MatrixEngine {
                     steps.append(LUStep(
                         title: "Eliminate (\(i+1), \(k+1))",
                         description: "Multiplier m = \(val)/\(pivot) = \(multiplier). Set L[\(i+1)][\(k+1)] = \(multiplier). Update U Row \(i+1) = Row \(i+1) - (\(multiplier)) * Row \(k+1).",
+                        latex: "L = " + matLatex(L) + ", \\quad U = " + matLatex(U),
                         matrixL: L,
                         matrixU: U
                     ))
@@ -1652,7 +1659,7 @@ class MatrixEngine {
             }
         }
         
-        steps.append(LUStep(title: "Result", description: "LU Decomposition complete.", matrixL: L, matrixU: U))
+        steps.append(LUStep(title: "Result", description: "LU Decomposition complete.", latex: "L = " + matLatex(L) + ", \\quad U = " + matLatex(U), matrixL: L, matrixU: U))
         return (steps, L, U)
     }
     
@@ -1741,7 +1748,6 @@ class MatrixEngine {
             
             for vec in basis {
                 // Calculate norm string
-                let normSq = normSquared(vec)
                 let normStr = formatNorm(vec)
                 V_cols.append((vec, normStr))
             }

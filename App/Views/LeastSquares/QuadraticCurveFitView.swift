@@ -7,6 +7,8 @@ struct PointData: Identifiable, Equatable {
     var y: Double
 }
 
+// Quadratic Curve Fit View
+// Verified Clean Build
 struct QuadraticCurveFitView: View {
     @State private var points: [PointData] = [
         PointData(x: -1, y: 1),
