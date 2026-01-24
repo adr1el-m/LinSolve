@@ -114,6 +114,14 @@ struct DetailView: View {
                     TransposeOperationsView()
                 case .specialMatrixTypes:
                     SpecialMatrixTypesView()
+                case .verifySolutions:
+                    VerifySolutionsView()
+                case .gaussianElimination:
+                    GaussianEliminationView()
+                case .refRref:
+                    RefRrefView()
+                case .gaussJordan:
+                    GaussJordanView()
                 }
                 
                 Spacer()

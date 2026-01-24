@@ -62,7 +62,28 @@ struct ContentView: View {
                         }
                     )
                     
-                    // 5. Dot Products and Orthogonality
+                    // 5. Linear Systems & Determinants
+                    DisclosureGroup(
+                        content: {
+                            NavigationLink(value: AppSection.verifySolutions) {
+                                Label("Verify Solutions", systemImage: AppSection.verifySolutions.iconName)
+                            }
+                            NavigationLink(value: AppSection.gaussianElimination) {
+                                Label("Gaussian Elimination", systemImage: AppSection.gaussianElimination.iconName)
+                            }
+                            NavigationLink(value: AppSection.refRref) {
+                                Label("REF & RREF", systemImage: AppSection.refRref.iconName)
+                            }
+                            NavigationLink(value: AppSection.gaussJordan) {
+                                Label("Gauss-Jordan Method", systemImage: AppSection.gaussJordan.iconName)
+                            }
+                        },
+                        label: {
+                            Label("Linear Systems", systemImage: "equal.square")
+                        }
+                    )
+                    
+                    // 6. Dot Products and Orthogonality
                     DisclosureGroup(
                         content: {
                             NavigationLink(value: AppSection.dotProductApplication) {
