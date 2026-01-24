@@ -435,7 +435,7 @@ Since no values of x, y, z can make this true, the system has **no solution**.
                 
                 reductionSteps.append(GJReductionStep(
                     description: "Swap to position pivot",
-                    operation: "R\(subscript(currentRow + 1)) ↔ R\(subscript(pivotRow + 1))",
+                    operation: "R\(toSubscript(currentRow + 1)) ↔ R\(toSubscript(pivotRow + 1))",
                     matrix: fractionMatrix
                 ))
             }
@@ -449,7 +449,7 @@ Since no values of x, y, z can make this true, the system has **no solution**.
                 
                 reductionSteps.append(GJReductionStep(
                     description: "Scale row to make pivot equal 1",
-                    operation: "R\(subscript(currentRow + 1)) → (\(scale.description))R\(subscript(currentRow + 1))",
+                    operation: "R\(toSubscript(currentRow + 1)) → (\(scale.description))R\(toSubscript(currentRow + 1))",
                     matrix: fractionMatrix
                 ))
             }
@@ -464,7 +464,7 @@ Since no values of x, y, z can make this true, the system has **no solution**.
                     
                     reductionSteps.append(GJReductionStep(
                         description: "Eliminate entry in row \(row + 1)",
-                        operation: "R\(subscript(row + 1)) → R\(subscript(row + 1)) - (\(factor.description))R\(subscript(currentRow + 1))",
+                        operation: "R\(toSubscript(row + 1)) → R\(toSubscript(row + 1)) - (\(factor.description))R\(toSubscript(currentRow + 1))",
                         matrix: fractionMatrix
                     ))
                 }
@@ -486,7 +486,7 @@ Since no values of x, y, z can make this true, the system has **no solution**.
         }
     }
     
-    func subscript(_ n: Int) -> String {
+    func toSubscript(_ n: Int) -> String {
         let subscripts = ["₀", "₁", "₂", "₃", "₄", "₅", "₆", "₇", "₈", "₉"]
         return String(String(n).map { subscripts[Int(String($0))!] }.joined())
     }

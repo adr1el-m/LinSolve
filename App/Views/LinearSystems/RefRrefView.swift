@@ -272,7 +272,7 @@ struct RefRrefView: View {
                 
                 reductionSteps.append(ReductionStep(
                     description: "Swap rows to move non-zero entry to pivot position",
-                    operation: "R\(subscript(currentRow + 1)) ↔ R\(subscript(pivotRow + 1))",
+                    operation: "R\(toSubscript(currentRow + 1)) ↔ R\(toSubscript(pivotRow + 1))",
                     matrix: matrix,
                     pivotPositions: pivots
                 ))
@@ -288,7 +288,7 @@ struct RefRrefView: View {
                     
                     reductionSteps.append(ReductionStep(
                         description: "Eliminate entry below pivot at position (\(currentRow + 1), \(currentCol + 1))",
-                        operation: "R\(subscript(row + 1)) → R\(subscript(row + 1)) - (\(factor.description))R\(subscript(currentRow + 1))",
+                        operation: "R\(toSubscript(row + 1)) → R\(toSubscript(row + 1)) - (\(factor.description))R\(toSubscript(currentRow + 1))",
                         matrix: matrix,
                         pivotPositions: pivots
                     ))
@@ -312,7 +312,7 @@ struct RefRrefView: View {
                     
                     reductionSteps.append(ReductionStep(
                         description: "Scale row to make pivot equal to 1",
-                        operation: "R\(subscript(row + 1)) → (\(scale.description))R\(subscript(row + 1))",
+                        operation: "R\(toSubscript(row + 1)) → (\(scale.description))R\(toSubscript(row + 1))",
                         matrix: matrix,
                         pivotPositions: pivots
                     ))
@@ -332,7 +332,7 @@ struct RefRrefView: View {
                         
                         reductionSteps.append(ReductionStep(
                             description: "Eliminate entry above pivot at position (\(pivotRow + 1), \(pivotCol + 1))",
-                            operation: "R\(subscript(row + 1)) → R\(subscript(row + 1)) - (\(factor.description))R\(subscript(pivotRow + 1))",
+                            operation: "R\(toSubscript(row + 1)) → R\(toSubscript(row + 1)) - (\(factor.description))R\(toSubscript(pivotRow + 1))",
                             matrix: matrix,
                             pivotPositions: pivots
                         ))
@@ -354,7 +354,7 @@ struct RefRrefView: View {
         }
     }
     
-    func subscript(_ n: Int) -> String {
+    func toSubscript(_ n: Int) -> String {
         let subscripts = ["₀", "₁", "₂", "₃", "₄", "₅", "₆", "₇", "₈", "₉"]
         return String(String(n).map { subscripts[Int(String($0))!] }.joined())
     }

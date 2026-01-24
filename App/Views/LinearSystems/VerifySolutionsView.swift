@@ -54,7 +54,7 @@ A **solution** to a linear equation is a vector whose components, when substitut
                     HStack(spacing: 8) {
                         ForEach(0..<4, id: \.self) { i in
                             VStack(spacing: 4) {
-                                Text("a\(subscript(i + 1))")
+                                Text("a\(toSubscript(i + 1))")
                                     .font(.caption)
                                     .foregroundColor(.blue)
                                 TextField("0", text: $coefficients[i])
@@ -67,10 +67,10 @@ A **solution** to a linear equation is a vector whose components, when substitut
                             }
                             
                             if i < 3 {
-                                Text("x\(subscript(i + 1)) +")
+                                Text("x\(toSubscript(i + 1)) +")
                                     .font(.system(.body, design: .serif))
                             } else {
-                                Text("x\(subscript(i + 1)) =")
+                                Text("x\(toSubscript(i + 1)) =")
                                     .font(.system(.body, design: .serif))
                             }
                         }
@@ -105,7 +105,7 @@ A **solution** to a linear equation is a vector whose components, when substitut
                     HStack(spacing: 12) {
                         ForEach(0..<4, id: \.self) { i in
                             VStack(spacing: 4) {
-                                Text("x\(subscript(i + 1))")
+                                Text("x\(toSubscript(i + 1))")
                                     .font(.caption)
                                     .foregroundColor(.purple)
                                 TextField("0", text: $testVector[i])
@@ -289,7 +289,7 @@ A **solution** to a linear equation is a vector whose components, when substitut
         }
     }
     
-    func subscript(_ n: Int) -> String {
+    func toSubscript(_ n: Int) -> String {
         let subscripts = ["₀", "₁", "₂", "₃", "₄", "₅", "₆", "₇", "₈", "₉"]
         return String(String(n).map { subscripts[Int(String($0))!] }.joined())
     }
