@@ -1457,4 +1457,349 @@ class MatrixEngine {
             return rhs * lhs
         }
     }
+    
+    // MARK: - Gram-Schmidt & QR
+    
+    struct GramSchmidtStep: Identifiable {
+        let id = UUID()
+        let title: String
+        let description: String
+        let latex: String
+    }
+    
+    static func calculateGramSchmidt(matrix: [[Fraction]]) -> (steps: [GramSchmidtStep], Q: [[String]], R: [[String]], orthogonalBasis: [[Fraction]]) {
+        var steps: [GramSchmidtStep] = []
+        let rows = matrix.count
+        guard rows > 0 else { return ([], [], [], []) }
+        let cols = matrix[0].count
+        
+        // Convert columns to vectors
+        var As: [[Fraction]] = []
+        for c in 0..<cols {
+            var col: [Fraction] = []
+            for r in 0..<rows {
+                col.append(matrix[r][c])
+            }
+            As.append(col)
+        }
+        
+        var Us: [[Fraction]] = []
+        
+        steps.append(GramSchmidtStep(title: "Start", description: "We start with columns \(cols) vectors.", latex: "A = [a_1, \\dots, a_\(cols)]"))
+        
+        for i in 0..<cols {
+            let ai = As[i]
+            var ui = ai
+            var stepLatex = "u_\(i+1) = a_\(i+1)"
+            var desc = "Initialize u_\(i+1) as a_\(i+1)."
+            
+            if i > 0 {
+                desc += " Subtract projections onto previous orthogonal vectors."
+                for j in 0..<i {
+                    let uj = Us[j]
+                    let num = dotProduct(uj, ai)
+                    let den = dotProduct(uj, uj) // |uj|^2
+                    
+                    if den != .zero {
+                        let coeff = num / den
+                        // ui = ui - coeff * uj
+                        var proj: [Fraction] = []
+                        for k in 0..<rows {
+                            proj.append(coeff * uj[k])
+                        }
+                        
+                        var newUi: [Fraction] = []
+                        for k in 0..<rows {
+                            newUi.append(ui[k] - proj[k])
+                        }
+                        ui = newUi
+                        
+                        stepLatex += " - \\frac{\(num)}{\(den)} u_\(j+1)"
+                    }
+                }
+            }
+            
+            Us.append(ui)
+            
+            // Format the result vector
+            let vecStr = "\\begin{bmatrix} " + ui.map{$0.description}.joined(separator: "\\\\") + " \\end{bmatrix}"
+            steps.append(GramSchmidtStep(title: "Step \(i+1)", description: desc, latex: stepLatex + " = " + vecStr))
+        }
+        
+        // Normalize for Q (Symbolic)
+        var Q: [[String]] = []
+        // Initialize Q with empty strings
+        for _ in 0..<rows {
+            Q.append(Array(repeating: "", count: cols))
+        }
+        
+        for j in 0..<cols {
+            let uj = Us[j]
+            let normSq = normSquared(uj)
+            let normStr = formatNorm(uj)
+            
+            // If norm is 1, just copy
+            if normSq == .one {
+                for r in 0..<rows {
+                    Q[r][j] = uj[r].description
+                }
+            } else if normSq == .zero {
+                 for r in 0..<rows {
+                    Q[r][j] = "0"
+                }
+            } else {
+                // 1/sqrt(...) * val
+                for r in 0..<rows {
+                    let val = uj[r]
+                    if val == .zero {
+                        Q[r][j] = "0"
+                    } else {
+                        // "val / norm"
+                        Q[r][j] = "\\frac{\(val)}{\(normStr)}"
+                    }
+                }
+            }
+        }
+        
+        // Calculate R (Symbolic)
+        // R_ji = q_j . a_i
+        // But since we use unnormalized Us in steps, R_ji is defined such that A = QR
+        // a_i = sum (a_i . q_j) q_j
+        // So R_ji = a_i . q_j
+        
+        var R: [[String]] = []
+        for r in 0..<cols {
+            var row: [String] = []
+            for c in 0..<cols {
+                if r > c {
+                    row.append("0")
+                } else {
+                    // Compute dot(a_c, q_r)
+                    // a_c is As[c]
+                    // q_r is Us[r] / ||Us[r]||
+                    let ac = As[c]
+                    let ur = Us[r]
+                    let dot = dotProduct(ac, ur)
+                    let normSq = normSquared(ur)
+                    let normStr = formatNorm(ur)
+                    
+                    if dot == .zero {
+                        row.append("0")
+                    } else if normSq == .one {
+                        row.append(dot.description)
+                    } else {
+                        // dot / norm
+                        row.append("\\frac{\(dot)}{\(normStr)}")
+                    }
+                }
+            }
+            R.append(row)
+        }
+        
+        return (steps, Q, R, Us)
+    }
+    
+    // MARK: - LU Decomposition
+    
+    struct LUStep: Identifiable {
+        let id = UUID()
+        let title: String
+        let description: String
+        let matrixL: [[Fraction]]
+        let matrixU: [[Fraction]]
+    }
+    
+    static func calculateLUDecomposition(matrix: [[Fraction]]) -> (steps: [LUStep], L: [[Fraction]], U: [[Fraction]]) {
+        var steps: [LUStep] = []
+        let n = matrix.count
+        guard n > 0 && n == matrix[0].count else { return ([], [], []) }
+        
+        var L = Array(repeating: Array(repeating: Fraction.zero, count: n), count: n)
+        var U = matrix
+        
+        // Initialize L diagonal to 1
+        for i in 0..<n { L[i][i] = .one }
+        
+        steps.append(LUStep(title: "Start", description: "Initialize L = I and U = A.", matrixL: L, matrixU: U))
+        
+        for k in 0..<n-1 {
+            // Pivot U[k][k]
+            let pivot = U[k][k]
+            if pivot == .zero {
+                // Handle zero pivot (Basic implementation: just stop or skip)
+                steps.append(LUStep(title: "Zero Pivot", description: "Pivot at (\(k+1),\(k+1)) is zero. LU decomposition without permutation requires non-zero pivots.", matrixL: L, matrixU: U))
+                return (steps, L, U)
+            }
+            
+            for i in k+1..<n {
+                let val = U[i][k]
+                if val != .zero {
+                    let multiplier = val / pivot
+                    L[i][k] = multiplier
+                    
+                    // Row operation on U: R_i = R_i - multiplier * R_k
+                    for j in k..<n {
+                        U[i][j] = U[i][j] - (multiplier * U[k][j])
+                    }
+                    
+                    steps.append(LUStep(
+                        title: "Eliminate (\(i+1), \(k+1))",
+                        description: "Multiplier m = \(val)/\(pivot) = \(multiplier). Set L[\(i+1)][\(k+1)] = \(multiplier). Update U Row \(i+1) = Row \(i+1) - (\(multiplier)) * Row \(k+1).",
+                        matrixL: L,
+                        matrixU: U
+                    ))
+                }
+            }
+        }
+        
+        steps.append(LUStep(title: "Result", description: "LU Decomposition complete.", matrixL: L, matrixU: U))
+        return (steps, L, U)
+    }
+    
+    // MARK: - Rank-Nullity
+    
+    static func calculateRankNullity(matrix: [[Fraction]]) -> (rank: Int, nullity: Int, dimensions: String, theoremCheck: String) {
+        let rows = matrix.count
+        guard rows > 0 else { return (0, 0, "Empty", "") }
+        let cols = matrix[0].count
+        
+        let rrefSteps = calculateRREF(matrix: matrix)
+        guard let finalStep = rrefSteps.last else { return (0, 0, "", "") }
+        let rref = finalStep.matrix
+        
+        let pivots = getPivotIndices(rref: rref)
+        let rank = pivots.count
+        let nullity = cols - rank
+        
+        let dimStr = "\(rows) × \(cols)"
+        let check = "\(rank) + \(nullity) = \(cols)"
+        
+        return (rank, nullity, dimStr, check)
+    }
+
+    // MARK: - SVD
+    
+    struct SVDStep: Identifiable {
+        let id = UUID()
+        let title: String
+        let description: String
+        let latex: String
+    }
+    
+    static func calculateSVD(matrix: [[Fraction]]) -> (steps: [SVDStep], U: [[String]], Sigma: [String], V: [[String]]) {
+        var steps: [SVDStep] = []
+        let m = matrix.count
+        guard m > 0 else { return ([], [], [], []) }
+        let n = matrix[0].count
+        
+        // 1. Compute A^T A
+        let AT = transpose(matrix)
+        let ATA = multiply(matrixA: AT, matrixB: matrix)
+        
+        // Helper to format matrix for latex
+        func matLatex(_ mat: [[Fraction]]) -> String {
+            return "\\begin{bmatrix} " + mat.map { row in row.map { $0.description }.joined(separator: " & ") }.joined(separator: "\\\\ ") + " \\end{bmatrix}"
+        }
+        
+        steps.append(SVDStep(title: "1. Compute AᵀA", description: "Compute the symmetric matrix AᵀA.", latex: "A^TA = " + matLatex(ATA)))
+        
+        // 2. Eigenvalues
+        let polyRes = getCharacteristicPolynomial(matrix: ATA)
+        let roots = polyRes.roots.sorted(by: >)
+        // Filter out small errors/negatives
+        let sigmas = roots.map { sqrt(max(0, $0)) }
+        
+        let rootsStr = roots.map { formatRoot($0) }.joined(separator: ", ")
+        steps.append(SVDStep(title: "2. Eigenvalues of AᵀA", description: "Find eigenvalues. These are σ².", latex: "\\lambda = \\{ \(rootsStr) \\}"))
+        
+        let sigmaStr = sigmas.map { formatRoot($0) }.joined(separator: ", ")
+        steps.append(SVDStep(title: "3. Singular Values", description: "σ = √λ.", latex: "\\sigma = \\{ \(sigmaStr) \\}"))
+        
+        // 3. V (Eigenvectors of A^T A)
+        var V_cols: [([Fraction], String)] = [] // Vector and its norm string
+        
+        // Group roots to handle multiplicity
+        var grouped: [Double: [Double]] = [:]
+        for r in roots {
+            let key = round(r * 1000) / 1000
+            grouped[key, default: []].append(r)
+        }
+        let sortedKeys = grouped.keys.sorted(by: >)
+        
+        for key in sortedKeys {
+            let val = grouped[key]![0] // Representative
+            let res = calculateEigenBasis(matrix: ATA, eigenvalue: val)
+            var basis = res.basisVectors // Row vectors in logic, but represent columns
+            
+            // If dimension > 1, Gram Schmidt
+            if basis.count > 1 {
+                 let cols = transpose(basis)
+                 let gs = calculateGramSchmidt(matrix: cols)
+                 let orthoCols = gs.orthogonalBasis
+                 basis = transpose(orthoCols)
+            }
+            
+            for vec in basis {
+                // Calculate norm string
+                let normSq = normSquared(vec)
+                let normStr = formatNorm(vec)
+                V_cols.append((vec, normStr))
+            }
+        }
+        
+        // Format V
+        var V_str: [[String]] = Array(repeating: Array(repeating: "", count: n), count: n)
+        for j in 0..<min(V_cols.count, n) {
+            let (vec, normStr) = V_cols[j]
+            for i in 0..<n {
+                if vec[i] == .zero {
+                    V_str[i][j] = "0"
+                } else {
+                    if normStr == "1" {
+                        V_str[i][j] = vec[i].description
+                    } else {
+                        V_str[i][j] = "\\frac{\(vec[i].description)}{\(normStr)}"
+                    }
+                }
+            }
+        }
+        
+        steps.append(SVDStep(title: "4. Construct V", description: "Normalize eigenvectors of AᵀA to get columns of V.", latex: "V = [v_1 \\dots v_n]"))
+        
+        // 4. U
+        // u_i = (1/sigma_i) A v_i
+        var U_str: [[String]] = Array(repeating: Array(repeating: "?", count: min(m, n)), count: m)
+        
+        for j in 0..<min(m, n) {
+            if j < sigmas.count && sigmas[j] > 1e-5 {
+                let sigma = sigmas[j]
+                let sigmaStr = formatRoot(sigma)
+                let v = V_cols[j].0
+                let vNormStr = V_cols[j].1
+                
+                let Av = multiply(matrix: matrix, vector: v)
+                
+                for i in 0..<m {
+                    let val = Av[i]
+                    if val == .zero {
+                        U_str[i][j] = "0"
+                    } else {
+                        // val / (sigma * vNorm)
+                        // Simplified display
+                        let num = val.description
+                        let den = (vNormStr == "1") ? sigmaStr : "\(sigmaStr)\\sqrt{\(vNormStr.replacingOccurrences(of: "\\sqrt", with: "").replacingOccurrences(of: "{", with: "").replacingOccurrences(of: "}", with: ""))}"
+                         U_str[i][j] = "\\frac{\(num)}{\(den)}"
+                    }
+                }
+            } else {
+                for i in 0..<m { U_str[i][j] = "0" }
+            }
+        }
+        
+        steps.append(SVDStep(title: "5. Construct U", description: "Compute u_i = (1/σ_i)Av_i.", latex: "U = [u_1 \\dots u_r]"))
+
+        let Sigma_str = sigmas.map { formatRoot($0) }
+        
+        return (steps, U_str, Sigma_str, V_str)
+    }
 }

@@ -12,6 +12,9 @@ enum AppSection: String, CaseIterable, Identifiable {
     case eigenvalues = "Eigenvalues"
     case eigenvectors = "Eigenvectors"
     case diagonalization = "Diagonalization"
+    case gramSchmidt = "Gram-Schmidt & QR"
+    case luDecomposition = "LU Decomposition"
+    case svd = "Singular Value Decomposition"
     case orthogonality = "Inner Product & Orthogonality"
     case distanceHyperplane = "Distance to Hyperplane"
     case vectorArithmetic = "Vector Arithmetic"
@@ -22,6 +25,8 @@ enum AppSection: String, CaseIterable, Identifiable {
     case linearRegression = "Linear Regression"
     case quadraticCurveFitting = "Quadratic Curve Fitting"
     case geometric = "Geometric Visualization"
+    case transformation2D = "2D Transformation"
+    case rankNullity = "Rank-Nullity Theorem"
     case settings = "Settings"
     
     var id: String { rawValue }
@@ -37,6 +42,9 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .eigenvalues: return "λ"
         case .eigenvectors: return "v"
         case .diagonalization: return "PDP⁻¹"
+        case .gramSchmidt: return "QR"
+        case .luDecomposition: return "LU"
+        case .svd: return "UΣVᵀ"
         case .orthogonality: return "u·v"
         case .vectorArithmetic: return "u+v"
         case .linearCombinations: return "c₁v₁"
@@ -47,6 +55,8 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .linearRegression: return "y=mx+b"
         case .quadraticCurveFitting: return "y=ax²+bx+c"
         case .geometric: return "3D"
+        case .transformation2D: return "2D"
+        case .rankNullity: return "r+n"
         default: return ""
         }
     }
@@ -61,6 +71,9 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .eigenvalues: return "function"
         case .eigenvectors: return "arrow.up.left.and.arrow.down.right"
         case .diagonalization: return "arrow.triangle.2.circlepath"
+        case .gramSchmidt: return "square.stack.3d.forward.dottedline"
+        case .luDecomposition: return "slider.horizontal.3"
+        case .svd: return "waveform.path.ecg"
         case .orthogonality: return "angle"
         case .vectorArithmetic: return "plus.forwardslash.minus"
         case .linearCombinations: return "arrow.triangle.branch"
@@ -70,6 +83,9 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .leastSquaresInfinite: return "infinity"
         case .linearRegression: return "chart.xyaxis.line"
         case .quadraticCurveFitting: return "chart.line.uptrend.xyaxis"
+        case .geometric: return "cube.transparent"
+        case .transformation2D: return "square.grid.2x2"
+        case .rankNullity: return "chart.bar.doc.horizontal"
         case .settings: return "gear"
         default: return "" // Custom icon for subspaces
         }

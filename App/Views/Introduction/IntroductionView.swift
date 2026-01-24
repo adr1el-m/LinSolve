@@ -11,7 +11,7 @@ struct IntroductionView: View {
                         .foregroundStyle(LinearGradient(colors: [.blue, .purple], startPoint: .topLeading, endPoint: .bottomTrailing))
                         .padding(.bottom, 8)
                     
-                    Text("VectorLens")
+                    Text("LinSolve")
                         .font(.system(size: 42, weight: .bold, design: .serif))
                         .foregroundColor(.primary)
                     

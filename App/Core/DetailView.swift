@@ -58,6 +58,10 @@ struct DetailView: View {
                     DeterminantView()
                 case .geometric:
                     GeometricVisualizationView()
+                case .transformation2D:
+                    Transformation2DView()
+                case .rankNullity:
+                    RankNullityView()
                 case .settings:
                     SettingsView()
                 case .eigenvalues:
@@ -66,6 +70,12 @@ struct DetailView: View {
                     EigenvectorsView()
                 case .diagonalization:
                     DiagonalizationView()
+                case .gramSchmidt:
+                    GramSchmidtView()
+                case .luDecomposition:
+                    LUDecompositionView()
+                case .svd:
+                    SVDView()
                 case .orthogonality:
                     OrthogonalityView()
                 case .distanceHyperplane:
