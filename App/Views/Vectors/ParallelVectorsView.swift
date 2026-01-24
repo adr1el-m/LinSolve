@@ -114,7 +114,7 @@ struct ParallelVectorsView: View {
                         .padding(8)
                         .background(Color.black.opacity(0.05))
                         .cornerRadius(8)
-                        .overlay(HStack { BracketShape(left: true); Spacer(); BracketShape(left: false) })
+                        .overlay(HStack { BracketShape(left: true).stroke(Color.primary, lineWidth: 1.5).frame(width: 8); Spacer(); BracketShape(left: false).stroke(Color.primary, lineWidth: 1.5).frame(width: 8) })
                         
                         Text("is parallel to")
                         
@@ -126,7 +126,7 @@ struct ParallelVectorsView: View {
                         .padding(8)
                         .background(Color.black.opacity(0.05))
                         .cornerRadius(8)
-                        .overlay(HStack { BracketShape(left: true); Spacer(); BracketShape(left: false) })
+                        .overlay(HStack { BracketShape(left: true).stroke(Color.primary, lineWidth: 1.5).frame(width: 8); Spacer(); BracketShape(left: false).stroke(Color.primary, lineWidth: 1.5).frame(width: 8) })
                     }
                     .padding()
                     

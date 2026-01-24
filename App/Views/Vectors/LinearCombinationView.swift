@@ -282,8 +282,12 @@ struct VectorInputColumnSimple: View {
             .overlay(
                 HStack {
                     BracketShape(left: true)
+                        .stroke(Color.primary, lineWidth: 1.5)
+                        .frame(width: 8)
                     Spacer()
                     BracketShape(left: false)
+                        .stroke(Color.primary, lineWidth: 1.5)
+                        .frame(width: 8)
                 }
             )
         }

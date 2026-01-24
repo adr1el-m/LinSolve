@@ -1,6 +1,13 @@
 import SwiftUI
 
 struct VectorArithmeticView: View {
+    enum OperationMode: String, CaseIterable {
+        case linearCombination = "Linear Combination"
+        case subtraction = "Vector Subtraction"
+    }
+    
+    @State private var mode: OperationMode = .linearCombination
+    
     // State for inputs
     // Example uses 3D vectors
     @State private var xVec: [String] = ["1", "-2", "1"]
@@ -10,6 +17,10 @@ struct VectorArithmeticView: View {
     @State private var scalarA: String = "2"
     @State private var scalarB: String = "3"
     @State private var scalarC: String = "-1" // Represents -z as + (-1)z
+    
+    // Subtraction specific state
+    @State private var subVecA: [String] = ["4", "2", "1"]
+    @State private var subVecB: [String] = ["1", "5", "-1"]
     
     // Computation state
     @State private var showSteps: Bool = false
@@ -30,9 +41,23 @@ struct VectorArithmeticView: View {
                         .font(.title3)
                         .foregroundColor(.secondary)
                     
-                    Text("We can combine scalar multiplication with vector addition. Given vectors x, y, z and scalars a, b, c, we calculate the linear combination: ax + by + cz.")
-                        .font(.body)
-                        .padding(.vertical, 4)
+                    Picker("Operation", selection: $mode) {
+                        ForEach(OperationMode.allCases, id: \.self) { mode in
+                            Text(mode.rawValue).tag(mode)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .padding(.vertical)
+                    
+                    if mode == .linearCombination {
+                        Text("This module demonstrates the fundamental operations of Linear Algebra: **Scalar Multiplication** and **Vector Addition**.\n\nWhen we multiply a vector by a scalar (a single number), we scale its magnitude. When we add vectors, we combine their effects. Together, these operations form a **Linear Combination**: a·x + b·y + c·z.")
+                            .font(.body)
+                            .padding(.vertical, 4)
+                    } else {
+                        Text("Vector Subtraction is formally defined as adding the negative of a vector: **u - v = u + (-1)v**.\n\nHere we subtract Vector B from Vector A component-wise.")
+                            .font(.body)
+                            .padding(.vertical, 4)
+                    }
                 }
                 .padding()
                 .background(Color(uiColor: .secondarySystemBackground))
@@ -40,22 +65,29 @@ struct VectorArithmeticView: View {
                 
                 // Input Section
                 VStack(alignment: .leading, spacing: 15) {
-                    Text("Define Vectors and Scalars").font(.headline)
+                    Text("Define Vectors").font(.headline)
                     
-                    HStack(spacing: 20) {
-                        VectorInputColumn(label: "x", vector: $xVec, scalar: $scalarA)
-                        Text("+").font(.title)
-                        VectorInputColumn(label: "y", vector: $yVec, scalar: $scalarB)
-                        Text("+").font(.title)
-                        VectorInputColumn(label: "z", vector: $zVec, scalar: $scalarC)
+                    if mode == .linearCombination {
+                        HStack(spacing: 20) {
+                            VectorInputColumn(label: "x", vector: $xVec, scalar: $scalarA)
+                            Text("+").font(.title)
+                            VectorInputColumn(label: "y", vector: $yVec, scalar: $scalarB)
+                            Text("+").font(.title)
+                            VectorInputColumn(label: "z", vector: $zVec, scalar: $scalarC)
+                        }
+                    } else {
+                        HStack(spacing: 20) {
+                            VectorInputColumn(label: "u", vector: $subVecA, scalar: .constant("1"), showScalar: false)
+                            Text("-").font(.title)
+                            VectorInputColumn(label: "v", vector: $subVecB, scalar: .constant("1"), showScalar: false)
+                        }
                     }
-                    .padding()
-                    .background(Color(uiColor: .secondarySystemBackground))
-                    .cornerRadius(12)
                     
-                    Text("Note: Use a negative scalar for subtraction (e.g., -z is scalar -1).")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                    if mode == .linearCombination {
+                        Text("Note: Use a negative scalar for subtraction (e.g., -z is scalar -1).")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
                     
                     Button(action: compute) {
                         Text("Calculate Result")
@@ -73,57 +105,13 @@ struct VectorArithmeticView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         Text("Step-by-Step Solution").font(.title2).bold()
                         
-                        // Step 1: Scalar Multiplication
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Step 1: Perform Scalar Multiplication")
-                                .font(.headline)
-                            Text("Multiply each component of the vectors by their respective scalars.")
-                                .font(.body)
-                            
-                            HStack(spacing: 10) {
-                                // ax
-                                VStack {
-                                    Text("\(scalarA)x =")
-                                    VectorPreviewView(vector: scaledX)
-                                }
-                                Text("+")
-                                // by
-                                VStack {
-                                    Text("\(scalarB)y =")
-                                    VectorPreviewView(vector: scaledY)
-                                }
-                                Text("+")
-                                // cz
-                                VStack {
-                                    Text("\(scalarC)z =")
-                                    VectorPreviewView(vector: scaledZ)
-                                }
-                            }
-                            .padding()
-                            .background(Color(uiColor: .secondarySystemBackground))
-                            .cornerRadius(8)
+                        if mode == .linearCombination {
+                            linearCombinationSteps
+                        } else {
+                            subtractionSteps
                         }
                         
-                        // Step 2: Component-wise Addition
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Step 2: Add Components")
-                                .font(.headline)
-                            Text("Add the corresponding components from each scaled vector.")
-                                .font(.body)
-                            
-                            // Show the arithmetic for each row
-                            VStack(alignment: .leading, spacing: 4) {
-                                ForEach(0..<3, id: \.self) { i in
-                                    Text("Row \(i+1): \(scaledX[i].description) + \(scaledY[i].description) + \(scaledZ[i].description) = \(finalResult[i].description)")
-                                        .font(.system(.body, design: .monospaced))
-                                        .padding(4)
-                                        .background(Color.yellow.opacity(0.1))
-                                        .cornerRadius(4)
-                                }
-                            }
-                        }
-                        
-                        // Step 3: Final Result
+                        // Step 3: Final Result (Common UI)
                         VStack(alignment: .leading, spacing: 10) {
                             Text("Final Result")
                                 .font(.headline)
@@ -144,33 +132,195 @@ struct VectorArithmeticView: View {
                 Spacer()
             }
         }
+        .onChange(of: mode) { _ in
+            showSteps = false
+        }
+    }
+    
+    var linearCombinationSteps: some View {
+        Group {
+            // Step 1: Scalar Multiplication
+            VStack(alignment: .leading, spacing: 15) {
+                Text("Step 1: Perform Scalar Multiplication")
+                    .font(.headline)
+                Text("First, we multiply each vector by its corresponding scalar. This is done by distributing the scalar value to every component within the vector.")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                
+                // Detailed breakdown for each vector
+                VStack(alignment: .leading, spacing: 20) {
+                    // Vector X
+                    ScalarMultiplicationStep(
+                        label: "x",
+                        scalar: scalarA,
+                        originalVector: xVec,
+                        resultVector: scaledX
+                    )
+                    
+                    Divider()
+                    
+                    // Vector Y
+                    ScalarMultiplicationStep(
+                        label: "y",
+                        scalar: scalarB,
+                        originalVector: yVec,
+                        resultVector: scaledY
+                    )
+                    
+                    Divider()
+                    
+                    // Vector Z
+                    ScalarMultiplicationStep(
+                        label: "z",
+                        scalar: scalarC,
+                        originalVector: zVec,
+                        resultVector: scaledZ
+                    )
+                }
+                .padding()
+                .background(Color(uiColor: .secondarySystemBackground))
+                .cornerRadius(12)
+            }
+            
+            // Step 2: Component-wise Addition
+            VStack(alignment: .leading, spacing: 15) {
+                Text("Step 2: Add Components")
+                    .font(.headline)
+                Text("Now that we have scaled the vectors, we add them together. Vector addition is performed component-wise: we sum the first components together, then the second components, and so on.")
+                    .font(.body)
+                    .foregroundColor(.secondary)
+                
+                VStack(spacing: 12) {
+                    // Header
+                    HStack {
+                        Text("Component")
+                            .bold()
+                            .frame(width: 80, alignment: .leading)
+                        Text("Calculation")
+                            .bold()
+                        Spacer()
+                        Text("Result")
+                            .bold()
+                            .frame(width: 50, alignment: .trailing)
+                    }
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.bottom, 4)
+                    
+                    ForEach(0..<3, id: \.self) { i in
+                        HStack(alignment: .top) {
+                            Text("Row \(i+1)")
+                                .font(.system(.body, design: .monospaced))
+                                .foregroundColor(.secondary)
+                                .frame(width: 80, alignment: .leading)
+                            
+                            Text("\(scaledX[i].description) + \(scaledY[i].description) + \(scaledZ[i].description)")
+                                .font(.system(.body, design: .monospaced))
+                            
+                            Spacer()
+                            
+                            Text("= \(finalResult[i].description)")
+                                .font(.system(.body, design: .monospaced))
+                                .bold()
+                                .frame(width: 50, alignment: .trailing)
+                        }
+                        .padding(8)
+                        .background(Color.white)
+                        .cornerRadius(8)
+                    }
+                }
+                .padding()
+                .background(Color(uiColor: .secondarySystemBackground).opacity(0.5))
+                .cornerRadius(8)
+            }
+        }
+    }
+    
+    var subtractionSteps: some View {
+        Group {
+            Text("To subtract v from u, we calculate u - v component by component.")
+                .font(.body)
+            
+            VStack(spacing: 12) {
+                HStack {
+                    Text("Component")
+                        .bold()
+                        .frame(width: 80, alignment: .leading)
+                    Text("Calculation (u - v)")
+                        .bold()
+                    Spacer()
+                    Text("Result")
+                        .bold()
+                        .frame(width: 50, alignment: .trailing)
+                }
+                .font(.caption)
+                .foregroundColor(.secondary)
+                
+                ForEach(0..<3, id: \.self) { i in
+                    HStack(alignment: .top) {
+                        Text("Row \(i+1)")
+                            .font(.system(.body, design: .monospaced))
+                            .foregroundColor(.secondary)
+                            .frame(width: 80, alignment: .leading)
+                        
+                        Text("\(subVecA[i]) - (\(subVecB[i]))")
+                            .font(.system(.body, design: .monospaced))
+                        
+                        Spacer()
+                        
+                        Text("= \(finalResult[i].description)")
+                            .font(.system(.body, design: .monospaced))
+                            .bold()
+                            .frame(width: 50, alignment: .trailing)
+                    }
+                    .padding(8)
+                    .background(Color.white)
+                    .cornerRadius(8)
+                }
+            }
+            .padding()
+            .background(Color(uiColor: .secondarySystemBackground).opacity(0.5))
+            .cornerRadius(8)
+        }
     }
     
     func compute() {
-        // Parse inputs
-        let a = Fraction(string: scalarA)
-        let b = Fraction(string: scalarB)
-        let c = Fraction(string: scalarC)
-        
-        let x = xVec.map { Fraction(string: $0) }
-        let y = yVec.map { Fraction(string: $0) }
-        let z = zVec.map { Fraction(string: $0) }
-        
-        // Scalar Mult
-        let ax = x.map { $0 * a }
-        let by = y.map { $0 * b }
-        let cz = z.map { $0 * c }
-        
-        self.scaledX = ax
-        self.scaledY = by
-        self.scaledZ = cz
-        
-        // Sum
-        var res: [Fraction] = []
-        for i in 0..<3 {
-            res.append(ax[i] + by[i] + cz[i])
+        if mode == .linearCombination {
+            // Parse inputs
+            let a = Fraction(string: scalarA)
+            let b = Fraction(string: scalarB)
+            let c = Fraction(string: scalarC)
+            
+            let x = xVec.map { Fraction(string: $0) }
+            let y = yVec.map { Fraction(string: $0) }
+            let z = zVec.map { Fraction(string: $0) }
+            
+            // Scalar Mult
+            let ax = x.map { $0 * a }
+            let by = y.map { $0 * b }
+            let cz = z.map { $0 * c }
+            
+            self.scaledX = ax
+            self.scaledY = by
+            self.scaledZ = cz
+            
+            // Sum
+            var res: [Fraction] = []
+            for i in 0..<3 {
+                res.append(ax[i] + by[i] + cz[i])
+            }
+            self.finalResult = res
+        } else {
+            // Subtraction
+            let u = subVecA.map { Fraction(string: $0) }
+            let v = subVecB.map { Fraction(string: $0) }
+            
+            var res: [Fraction] = []
+            for i in 0..<3 {
+                res.append(u[i] - v[i])
+            }
+            self.finalResult = res
         }
-        self.finalResult = res
         
         withAnimation {
             showSteps = true
@@ -182,17 +332,22 @@ struct VectorInputColumn: View {
     let label: String
     @Binding var vector: [String]
     @Binding var scalar: String
+    var showScalar: Bool = true
     
     var body: some View {
         VStack(spacing: 8) {
             // Scalar Input
-            TextField("s", text: $scalar)
-                .keyboardType(.numbersAndPunctuation)
-                .multilineTextAlignment(.center)
-                .frame(width: 40, height: 30)
-                .background(Color(uiColor: .tertiarySystemBackground))
-                .cornerRadius(6)
-                .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.gray.opacity(0.3)))
+            if showScalar {
+                TextField("s", text: $scalar)
+                    .keyboardType(.numbersAndPunctuation)
+                    .multilineTextAlignment(.center)
+                    .frame(width: 40, height: 30)
+                    .background(Color(uiColor: .tertiarySystemBackground))
+                    .cornerRadius(6)
+                    .overlay(RoundedRectangle(cornerRadius: 6).stroke(Color.gray.opacity(0.3)))
+            } else {
+                Color.clear.frame(width: 40, height: 30)
+            }
             
             Text(label).font(.headline)
             
@@ -213,34 +368,100 @@ struct VectorInputColumn: View {
             .overlay(
                 HStack {
                     BracketShape(left: true)
+                        .stroke(Color.primary, lineWidth: 1.5)
+                        .frame(width: 8)
                     Spacer()
                     BracketShape(left: false)
+                        .stroke(Color.primary, lineWidth: 1.5)
+                        .frame(width: 8)
                 }
             )
         }
     }
 }
 
-// Helper for bracket visualization
-struct BracketShape: Shape {
-    let left: Bool
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        let w = rect.width
-        let h = rect.height
-        let arm: CGFloat = 6
-        
-        if left {
-            path.move(to: CGPoint(x: arm, y: 0))
-            path.addLine(to: CGPoint(x: 0, y: 0))
-            path.addLine(to: CGPoint(x: 0, y: h))
-            path.addLine(to: CGPoint(x: arm, y: h))
-        } else {
-            path.move(to: CGPoint(x: w - arm, y: 0))
-            path.addLine(to: CGPoint(x: w, y: 0))
-            path.addLine(to: CGPoint(x: w, y: h))
-            path.addLine(to: CGPoint(x: w - arm, y: h))
+
+
+struct ScalarMultiplicationStep: View {
+    let label: String
+    let scalar: String
+    let originalVector: [String]
+    let resultVector: [Fraction]
+    
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(alignment: .center, spacing: 10) {
+                // Label: 2 * x
+                Text("\(scalar) · \(label)")
+                    .font(.headline)
+                    .frame(width: 50, alignment: .leading)
+                
+                // Original Vector
+                VectorStringPreview(vector: originalVector)
+                
+                Text("=")
+                    .font(.title2)
+                
+                // Expanded Calculation
+                VStack(spacing: 4) {
+                    ForEach(0..<originalVector.count, id: \.self) { i in
+                         Text("\(scalar) · (\(originalVector[i]))")
+                            .font(.system(.body, design: .monospaced))
+                            .padding(.vertical, 2)
+                            .padding(.horizontal, 4)
+                            .background(Color.yellow.opacity(0.1))
+                            .cornerRadius(4)
+                    }
+                }
+                .padding(8)
+                .background(Color(uiColor: .systemBackground))
+                .cornerRadius(8)
+                .overlay(
+                HStack {
+                    BracketShape(left: true)
+                        .stroke(Color.primary, lineWidth: 1.5)
+                        .frame(width: 8)
+                    Spacer()
+                    BracketShape(left: false)
+                        .stroke(Color.primary, lineWidth: 1.5)
+                        .frame(width: 8)
+                }
+            )
+                
+                Text("=")
+                    .font(.title2)
+                
+                // Result Vector
+                VectorPreviewView(vector: resultVector)
+            }
+            .padding(.horizontal, 4)
         }
-        return path
+    }
+}
+
+struct VectorStringPreview: View {
+    let vector: [String]
+    var body: some View {
+        VStack(spacing: 4) {
+            ForEach(vector, id: \.self) { val in
+                Text(val)
+                    .font(.system(.body, design: .monospaced))
+                    .frame(minWidth: 20)
+            }
+        }
+        .padding(8)
+        .background(Color(uiColor: .tertiarySystemBackground))
+        .cornerRadius(8)
+        .overlay(
+            HStack {
+                BracketShape(left: true)
+                    .stroke(Color.primary, lineWidth: 1.5)
+                    .frame(width: 8)
+                Spacer()
+                BracketShape(left: false)
+                    .stroke(Color.primary, lineWidth: 1.5)
+                    .frame(width: 8)
+            }
+        )
     }
 }

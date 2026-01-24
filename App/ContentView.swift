@@ -38,7 +38,55 @@ struct ContentView: View {
                         }
                     )
                     
-                    // 4. Subspaces Dropdown
+                    // 4. Matrix Operations
+                    DisclosureGroup(
+                        content: {
+                            NavigationLink(value: AppSection.matrixArithmetic) {
+                                Label("Matrix Arithmetic", systemImage: AppSection.matrixArithmetic.iconName)
+                            }
+                            NavigationLink(value: AppSection.matrixMultiplication) {
+                                Label("Matrix Multiplication", systemImage: AppSection.matrixMultiplication.iconName)
+                            }
+                            NavigationLink(value: AppSection.matrixExponents) {
+                                Label("Matrix Powers", systemImage: AppSection.matrixExponents.iconName)
+                            }
+                            NavigationLink(value: AppSection.transposeOperations) {
+                                Label("Transpose Operations", systemImage: AppSection.transposeOperations.iconName)
+                            }
+                            NavigationLink(value: AppSection.specialMatrixTypes) {
+                                Label("Special Matrix Types", systemImage: AppSection.specialMatrixTypes.iconName)
+                            }
+                        },
+                        label: {
+                            Label("Matrix Operations", systemImage: "square.grid.3x3")
+                        }
+                    )
+                    
+                    // 5. Dot Products and Orthogonality
+                    DisclosureGroup(
+                        content: {
+                            NavigationLink(value: AppSection.dotProductApplication) {
+                                Label("Dot Product Application", systemImage: AppSection.dotProductApplication.iconName)
+                            }
+                            NavigationLink(value: AppSection.complexVectorArithmetic) {
+                                Label("Complex Arithmetic", systemImage: AppSection.complexVectorArithmetic.iconName)
+                            }
+                            NavigationLink(value: AppSection.normalizationScaling) {
+                                Label("Normalization & Scaling", systemImage: AppSection.normalizationScaling.iconName)
+                            }
+                            NavigationLink(value: AppSection.anglesBetweenVectors) {
+                                Label("Angles Between Vectors", systemImage: AppSection.anglesBetweenVectors.iconName)
+                            }
+                            NavigationLink(value: AppSection.orthogonalSets) {
+                                Label("Orthogonal Sets", systemImage: AppSection.orthogonalSets.iconName)
+                            }
+                        },
+                        label: {
+                            Label("Dot Products & Orthogonality", systemImage: "circle.grid.cross")
+                        }
+                    )
+                    
+                    // 6. Fundamental Subspaces
                     DisclosureGroup(
                         content: {
                             NavigationLink(value: AppSection.columnSpace) { Label("Column Space C(A)", systemImage: "arrow.up.right.square") }
@@ -51,22 +99,42 @@ struct ContentView: View {
                         }
                     )
                     
-                    // 4. Matrix Inverse
-                    NavigationLink(value: AppSection.inverse) {
-                        Label(AppSection.inverse.rawValue, systemImage: AppSection.inverse.iconName)
-                    }
-                    
-                    // 5. Determinant
+                    // 7. Determinant
                     NavigationLink(value: AppSection.determinant) {
                         Label(AppSection.determinant.rawValue, systemImage: AppSection.determinant.iconName)
                     }
+                    
+                    // 8. Matrix Inverse
+                    NavigationLink(value: AppSection.inverse) {
+                        Label(AppSection.inverse.rawValue, systemImage: AppSection.inverse.iconName)
+                    }
 
-                    // 6. Inner Product & Orthogonality
+                    // 9. Eigenvalues and Eigenvectors
+                    DisclosureGroup(
+                        content: {
+                            NavigationLink(value: AppSection.eigenvalues) {
+                                Label("Eigenvalues", systemImage: AppSection.eigenvalues.iconName)
+                            }
+                            NavigationLink(value: AppSection.eigenvectors) {
+                                Label("Eigenvectors", systemImage: AppSection.eigenvectors.iconName)
+                            }
+                        },
+                        label: {
+                            Label("Eigenvalues & Vectors", systemImage: "chart.xyaxis.line")
+                        }
+                    )
+
+                    // 10. Diagonalization
+                    NavigationLink(value: AppSection.diagonalization) {
+                        Label(AppSection.diagonalization.rawValue, systemImage: AppSection.diagonalization.iconName)
+                    }
+                    
+                    // 11. Inner Product & Orthogonality
                     NavigationLink(value: AppSection.orthogonality) {
                         Label(AppSection.orthogonality.rawValue, systemImage: AppSection.orthogonality.iconName)
                     }
 
-                    // 7. Least Squares Approximation
+                    // 12. Least Squares Approximation
                     DisclosureGroup(
                         content: {
                             NavigationLink(value: AppSection.distanceHyperplane) {
@@ -90,27 +158,7 @@ struct ContentView: View {
                         }
                     )
                     
-                    // 8. Eigenvalues and Eigenvectors
-                    DisclosureGroup(
-                        content: {
-                            NavigationLink(value: AppSection.eigenvalues) {
-                                Label("Eigenvalues", systemImage: AppSection.eigenvalues.iconName)
-                            }
-                            NavigationLink(value: AppSection.eigenvectors) {
-                                Label("Eigenvectors", systemImage: AppSection.eigenvectors.iconName)
-                            }
-                        },
-                        label: {
-                            Label("Eigenvalues & Vectors", systemImage: "chart.xyaxis.line")
-                        }
-                    )
-
-                    // 9. Diagonalization
-                    NavigationLink(value: AppSection.diagonalization) {
-                        Label(AppSection.diagonalization.rawValue, systemImage: AppSection.diagonalization.iconName)
-                    }
-                    
-                    // 10. Geometric Visualization
+                    // 13. Geometric Visualization
                     NavigationLink(value: AppSection.geometric) {
                         Label(AppSection.geometric.rawValue, systemImage: AppSection.geometric.iconName)
                     }
@@ -121,24 +169,25 @@ struct ContentView: View {
                         Label("Settings", systemImage: "gear")
                     }
                 }
+                
+                // Footer - scrolls with content, not sticky
+                Section {
+                    VStack(spacing: 4) {
+                        Text("This Swift Playgrounds app project and activities within it are written by Adriel Magalona.")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                        Text("Swift Student Challenge 2026")
+                            .font(.caption2)
+                            .bold()
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .listRowBackground(Color.clear)
+                }
             }
             .navigationTitle("LinSolve")
             .listStyle(.sidebar)
-            .safeAreaInset(edge: .bottom) {
-                VStack(spacing: 4) {
-                    Text("This Swift Playgrounds app project and activities within it are written by Adriel Magalona.")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                    Text("Swift Student Challenge 2026")
-                        .font(.caption2)
-                        .bold()
-                        .foregroundColor(.secondary)
-                }
-                .padding(.vertical, 12)
-                .background(Color(uiColor: .systemBackground).opacity(0.8))
-            }
         } detail: {
             if let section = selectedSection {
                 DetailView(section: section, selectedSection: $selectedSection)

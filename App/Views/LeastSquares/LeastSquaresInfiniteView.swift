@@ -181,9 +181,9 @@ struct LeastSquaresInfiniteView: View {
                         
                         Text("General Solution Structure")
                             .font(.headline)
-                        Text("The general solution is x̂ = x̂_p + x̂_h, where:")
-                        Text("• x̂_p is a particular solution (free variables = 0)")
-                        Text("• x̂_h is the homogeneous solution (null space of AᵀA)")
+                        MathView(latex: "\\text{The general solution is } \\hat{x} = \\hat{x}_p + \\hat{x}_h \\text{, where:}")
+                        MathView(latex: "\\bullet \\; \\hat{x}_p \\text{ is a particular solution (free variables = 0)}")
+                        MathView(latex: "\\bullet \\; \\hat{x}_h \\text{ is the homogeneous solution (null space of } A^T A \\text{)}")
                         
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(alignment: .center, spacing: 8) {

@@ -94,6 +94,26 @@ struct DetailView: View {
                     LinearCombinationView()
                 case .parallelVectors:
                     ParallelVectorsView()
+                case .dotProductApplication:
+                    DotProductApplicationView()
+                case .complexVectorArithmetic:
+                    ComplexVectorArithmeticView()
+                case .normalizationScaling:
+                    NormalizationScalingView()
+                case .anglesBetweenVectors:
+                    AnglesBetweenVectorsView()
+                case .orthogonalSets:
+                    OrthogonalSetsView()
+                case .matrixArithmetic:
+                    MatrixArithmeticView()
+                case .matrixMultiplication:
+                    MatrixMultiplicationView()
+                case .matrixExponents:
+                    MatrixExponentsView()
+                case .transposeOperations:
+                    TransposeOperationsView()
+                case .specialMatrixTypes:
+                    SpecialMatrixTypesView()
                 }
                 
                 Spacer()

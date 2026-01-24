@@ -6,7 +6,9 @@ struct MatrixPreviewView: View {
     var body: some View {
         HStack(alignment: .center, spacing: 2) {
             // Left Bracket
-            bracket(isLeft: true)
+            BracketShape(left: true)
+                .stroke(Color.primary, lineWidth: 1.5)
+                .frame(width: 8)
             
             // Matrix Content
             VStack(spacing: 4) {
@@ -24,34 +26,9 @@ struct MatrixPreviewView: View {
             .padding(.horizontal, 2)
             
             // Right Bracket
-            bracket(isLeft: false)
+            BracketShape(left: false)
+                .stroke(Color.primary, lineWidth: 1.5)
+                .frame(width: 8)
         }
-    }
-    
-    func bracket(isLeft: Bool) -> some View {
-        Rectangle()
-            .fill(Color.primary)
-            .frame(width: 2)
-            .mask(
-                HStack(spacing: 0) {
-                    if isLeft {
-                        Rectangle().frame(width: 2)
-                        VStack {
-                            Rectangle().frame(height: 2)
-                            Spacer()
-                            Rectangle().frame(height: 2)
-                        }
-                        .frame(width: 6)
-                    } else {
-                        VStack {
-                            Rectangle().frame(height: 2)
-                            Spacer()
-                            Rectangle().frame(height: 2)
-                        }
-                        .frame(width: 6)
-                        Rectangle().frame(width: 2)
-                    }
-                }
-            )
     }
 }
