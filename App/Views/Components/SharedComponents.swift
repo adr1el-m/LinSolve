@@ -55,6 +55,9 @@ struct InfoBox: View {
         .background(color.opacity(0.1))
         .cornerRadius(8)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(content)")
+        .accessibilityHint(description ?? "")
     }
 }
 
@@ -171,5 +174,7 @@ struct ProcessStepView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Step \(step): \(title)")
     }
 }

@@ -1,34 +1,52 @@
 import Foundation
 
-struct Fraction: Equatable, CustomStringConvertible, Comparable {
+// MARK: - Fraction
+
+/// A rational number representation with automatic simplification
+/// Supports arithmetic operations and conversions from strings and doubles
+struct Fraction: Equatable, CustomStringConvertible, Comparable, Hashable {
     let numerator: Int
     let denominator: Int
     
     static let zero = Fraction(0)
     static let one = Fraction(1)
     
+    /// Creates a fraction from integer numerator and denominator
+    /// - Parameters:
+    ///   - n: Numerator
+    ///   - d: Denominator (must be non-zero)
+    /// - Note: The fraction is automatically reduced to lowest terms
     init(_ n: Int, _ d: Int = 1) {
-        if d == 0 { fatalError("Denominator cannot be zero") }
+        precondition(d != 0, "Denominator cannot be zero")
+        guard d != 0 else {
+            self.numerator = 0
+            self.denominator = 1
+            return
+        }
         let common = gcd(abs(n), abs(d))
         let sign = (n < 0) == (d < 0) ? 1 : -1
         self.numerator = sign * abs(n) / common
         self.denominator = abs(d) / common
     }
     
+    /// Creates a fraction from a string representation
+    /// - Parameter string: String in format "n/d", "n", or decimal like "0.5"
+    /// - Note: Falls back to zero if parsing fails
     init(string: String) {
-        let parts = string.components(separatedBy: "/")
-        if parts.count == 2, let n = Int(parts[0]), let d = Int(parts[1]) {
+        let trimmed = string.trimmingCharacters(in: .whitespaces)
+        let parts = trimmed.components(separatedBy: "/")
+        
+        if parts.count == 2, let n = Int(parts[0]), let d = Int(parts[1]), d != 0 {
             self.init(n, d)
-        } else if let n = Int(string) {
+        } else if let n = Int(trimmed) {
             self.init(n, 1)
-        } else if let d = Double(string) {
-            // Best effort for decimals
-            // This is a simplification for the UI input "0.5" -> 1/2
-            // For now, let's assume users enter fractions or ints as requested, 
-            // but if they enter 0.5 we can try to handle it.
-            let n = Int(d * 10000)
-            self.init(n, 10000)
+        } else if let d = Double(trimmed) {
+            // Convert decimal to fraction with precision up to 10000
+            let multiplier = 10000.0
+            let n = Int(round(d * multiplier))
+            self.init(n, Int(multiplier))
         } else {
+            // Fallback to zero for invalid input
             self.init(0)
         }
     }
@@ -63,11 +81,18 @@ struct Fraction: Equatable, CustomStringConvertible, Comparable {
     }
 }
 
+/// Computes the greatest common divisor using Euclidean algorithm
+/// - Parameters:
+///   - a: First integer
+///   - b: Second integer
+/// - Returns: The GCD of a and b
 func gcd(_ a: Int, _ b: Int) -> Int {
+    guard b != 0 else { return abs(a) }
     let r = a % b
-    return r != 0 ? gcd(b, r) : b
+    return r != 0 ? gcd(b, r) : abs(b)
 }
 
+/// Represents a step in the matrix reduction process
 struct MatrixStep: Identifiable {
     let id = UUID()
     let matrix: [[Fraction]]
@@ -76,6 +101,9 @@ struct MatrixStep: Identifiable {
     let isFinal: Bool
 }
 
+// MARK: - Matrix Engine
+
+/// Core computational engine for linear algebra operations
 class MatrixEngine {
     
     static func transpose(_ matrix: [[Fraction]]) -> [[Fraction]] {

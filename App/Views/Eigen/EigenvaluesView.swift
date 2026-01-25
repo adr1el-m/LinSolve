@@ -8,23 +8,70 @@ struct EigenvaluesView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                // Header
-                VStack(spacing: 8) {
-                    Text("Eigenvalues")
-                        .font(.largeTitle)
-                        .bold()
-                    Text("Roots of Characteristic Polynomial")
+                // Header with beginner-friendly explanation
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack {
+                        Image(systemName: "function")
+                            .font(.largeTitle)
+                            .foregroundColor(.purple)
+                        Text("Finding Eigenvalues")
+                            .font(.largeTitle)
+                            .bold()
+                    }
+                    
+                    Text("The Characteristic Polynomial Method")
                         .font(.title3)
                         .foregroundColor(.secondary)
+                    
+                    Divider()
+                    
+                    Text("What is an Eigenvalue?")
+                        .font(.headline)
+                    
+                    Text("""
+**Eigenvalues** are special numbers associated with a matrix. When a matrix A multiplies certain vectors (called eigenvectors), it simply **scales** those vectors without changing their direction. The scaling factor is the eigenvalue.
+
+**In symbols:** If Av = λv, then:
+• **v** is an eigenvector
+• **λ** (lambda) is the corresponding eigenvalue
+
+**Why do eigenvalues matter?**
+• They reveal the "natural frequencies" of a system
+• They determine if a matrix is invertible (no zero eigenvalue = invertible)
+• They're essential for diagonalization, stability analysis, and PCA
+• Every vibrating system, from bridges to molecules, has eigenvalues
+""")
+                        .font(.body)
+                    
+                    // How to find them
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("How to Find Eigenvalues")
+                            .font(.subheadline)
+                            .bold()
+                        
+                        Text("""
+1. Form the matrix **(λI − A)** where I is the identity matrix and λ is unknown
+2. Compute the **characteristic polynomial**: det(λI − A)
+3. Set the polynomial equal to zero and **solve for λ**
+4. The solutions are the eigenvalues!
+""")
+                            .font(.callout)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding()
+                    .background(Color.purple.opacity(0.1))
+                    .cornerRadius(10)
                 }
-                .padding(.top)
+                .padding()
+                .background(Color(uiColor: .secondarySystemBackground))
+                .cornerRadius(12)
                 
                 if matrixData.rows != matrixData.cols {
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle")
                         .font(.system(size: 50))
                         .foregroundColor(.orange)
-                        Text("Eigenvalues are only defined for square matrices.")
+                        Text("Eigenvalues are only defined for **square matrices**.\n\nPlease set up a square matrix (same number of rows and columns) in the Matrix Calculator.")
                             .multilineTextAlignment(.center)
                     }
                     .padding()
@@ -35,7 +82,7 @@ struct EigenvaluesView: View {
                         Image(systemName: "exclamationmark.triangle")
                         .font(.system(size: 50))
                         .foregroundColor(.orange)
-                        Text("Step-by-step only supported for 2x2 and 3x3 matrices.")
+                        Text("Step-by-step visualization is available for 2×2 and 3×3 matrices.\n\nFor larger matrices, the characteristic polynomial becomes too complex for hand calculation.")
                             .multilineTextAlignment(.center)
                     }
                     .padding()
@@ -56,24 +103,39 @@ struct EigenvaluesView: View {
                             if steps.isEmpty {
                                 Text("Calculating...")
                             } else {
-                                Text("No real eigenvalues found.")
-                                    .foregroundColor(.secondary)
+                                VStack(spacing: 8) {
+                                    Text("No real eigenvalues found.")
+                                        .foregroundColor(.secondary)
+                                    Text("This matrix may have complex eigenvalues (involving √-1).")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         } else {
-                            HStack(spacing: 20) {
-                                ForEach(roots, id: \.self) { root in
-                                    VStack {
-                                        Text("x = \(formatRoot(root))")
-                                            .font(.title)
-                                            .bold()
-                                            .foregroundColor(.blue)
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("The eigenvalues are the values of λ that satisfy the characteristic equation:")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                
+                                HStack(spacing: 20) {
+                                    ForEach(Array(roots.enumerated()), id: \.offset) { index, root in
+                                        VStack {
+                                            Text("λ\(index + 1) = \(formatRoot(root))")
+                                                .font(.title2)
+                                                .bold()
+                                                .foregroundColor(.purple)
+                                        }
+                                        .padding()
+                                        .frame(minWidth: 80)
+                                        .background(Color(uiColor: .systemBackground))
+                                        .cornerRadius(12)
+                                        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
                                     }
-                                    .padding()
-                                    .frame(minWidth: 80)
-                                    .background(Color(uiColor: .systemBackground))
-                                    .cornerRadius(12)
-                                    .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
                                 }
+                                
+                                Text("Next step: Find the eigenvectors for each eigenvalue in the Eigenvectors section!")
+                                    .font(.caption)
+                                    .foregroundColor(.blue)
                             }
                         }
                     }

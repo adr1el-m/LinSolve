@@ -27,23 +27,78 @@ struct BasicDeterminantCalcView: View {
             VStack(alignment: .leading, spacing: 24) {
                 // Header
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Basic Determinant Calculation")
+                    Text("Computing Determinants")
                         .font(.largeTitle)
                         .bold()
-                    Text("Computing Determinants Step-by-Step")
+                    Text("From Simple 2×2 to Any Size Matrix")
                         .font(.title3)
                         .foregroundColor(.secondary)
                     
-                    Text("""
-The **determinant** is a single number computed from a square matrix that encodes important properties: whether the matrix is invertible, how it scales areas/volumes, and more.
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("What is a Determinant?")
+                            .font(.headline)
+                        
+                        Text("""
+The **determinant** is a special number computed from a square matrix. Think of it as a "summary" that tells you crucial information about the matrix at a glance.
 
-Different methods exist for calculating determinants depending on matrix size:
-• **2×2 matrices:** Simple cross-multiplication formula
-• **3×3 matrices:** Rule of Sarrus (diagonal method) or cofactor expansion
-• **Larger matrices:** Cofactor expansion or row reduction
+**What the Determinant Tells You:**
+• **det(A) ≠ 0** → The matrix is invertible (you can "undo" it)
+• **det(A) = 0** → The matrix is singular (not invertible, "squishes" space to a lower dimension)
+• **|det(A)|** → The factor by which the matrix scales areas (2D) or volumes (3D)
+• **sign(det(A))** → Whether the transformation preserves (+) or reverses (−) orientation
+
+**Geometric Intuition:** If you apply a matrix to a unit square, the determinant tells you the area of the resulting parallelogram. A determinant of 2 means the area doubled; a determinant of −1 means the area is preserved but the orientation flipped (like a mirror).
 """)
-                        .font(.body)
-                        .padding(.vertical, 4)
+                            .font(.body)
+                        
+                        // Quick reference card
+                        HStack(spacing: 16) {
+                            VStack {
+                                Text("det > 0")
+                                    .font(.caption).bold()
+                                Image(systemName: "arrow.right.square")
+                                    .font(.title2)
+                                    .foregroundColor(.green)
+                                Text("Preserves\norientation")
+                                    .font(.caption2)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.green.opacity(0.1))
+                            .cornerRadius(8)
+                            
+                            VStack {
+                                Text("det < 0")
+                                    .font(.caption).bold()
+                                Image(systemName: "arrow.left.arrow.right.square")
+                                    .font(.title2)
+                                    .foregroundColor(.orange)
+                                Text("Reverses\norientation")
+                                    .font(.caption2)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.orange.opacity(0.1))
+                            .cornerRadius(8)
+                            
+                            VStack {
+                                Text("det = 0")
+                                    .font(.caption).bold()
+                                Image(systemName: "rectangle.compress.vertical")
+                                    .font(.title2)
+                                    .foregroundColor(.red)
+                                Text("Collapses\ndimension")
+                                    .font(.caption2)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red.opacity(0.1))
+                            .cornerRadius(8)
+                        }
+                    }
                 }
                 .padding()
                 .background(Color(uiColor: .secondarySystemBackground))

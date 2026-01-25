@@ -1,11 +1,16 @@
 import SwiftUI
 
+/// Observable data model for matrix computations and derived properties
+/// Manages matrix dimensions, values, and all computed subspaces
 class MatrixData: ObservableObject {
+    // MARK: - Matrix Configuration
+    
     @Published var rows: Int = 3
     @Published var cols: Int = 3
     @Published var values: [[String]] = Array(repeating: Array(repeating: "0", count: 10), count: 10)
     
-    // Computed Results
+    // MARK: - Computed Results
+    
     @Published var rrefSteps: [MatrixStep] = []
     @Published var rrefTSteps: [MatrixStep] = []
     @Published var columnSpace: [[Fraction]] = []
@@ -17,33 +22,39 @@ class MatrixData: ObservableObject {
     @Published var determinantValue: Fraction? = nil
     @Published var inverseMatrix: [[Fraction]]? = nil
     
-    // Explanations
+    // MARK: - Explanations
+    
     @Published var columnSpaceExplanation: String = ""
     @Published var nullSpaceExplanation: String = ""
     @Published var rowSpaceExplanation: String = ""
     @Published var leftNullSpaceExplanation: String = ""
     
+    // MARK: - Initialization
+    
+    /// Initializes with a sample 3x3 matrix for demonstration
     init() {
         self.rows = 3
         self.cols = 3
+        // Initialize with a well-conditioned example matrix
         values[0][0] = "4"; values[0][1] = "1"; values[0][2] = "-1"
         values[1][0] = "2"; values[1][1] = "5"; values[1][2] = "-2"
         values[2][0] = "1"; values[2][1] = "1"; values[2][2] = "2"
     }
     
+    // MARK: - Public Methods
+    
+    /// Resets all matrix values to identity matrix and clears computed results
     func reset() {
         values = Array(repeating: Array(repeating: "0", count: 10), count: 10)
-        for i in 0..<min(rows, cols) { values[i][i] = "1" }
-        hasComputed = false
-        rrefSteps = []
-        rrefTSteps = []
-        columnSpace = []
-        rowSpace = []
-        nullSpace = []
-        leftNullSpace = []
-        determinantValue = nil
+        // Set diagonal to 1
+        for i in 0..<min(rows, cols) {
+            values[i][i] = "1"
+        }
+        clearComputedResults()
     }
     
+    /// Converts string matrix values to Fraction matrix
+    /// - Returns: A 2D array of Fraction values
     func getFractionMatrix() -> [[Fraction]] {
         var res: [[Fraction]] = []
         for r in 0..<rows {
@@ -56,6 +67,7 @@ class MatrixData: ObservableObject {
         return res
     }
     
+    /// Computes all matrix properties and derived subspaces
     func compute() {
         let matrix = getFractionMatrix()
         
@@ -137,5 +149,21 @@ class MatrixData: ObservableObject {
         withAnimation {
             hasComputed = true
         }
+    }
+    
+    // MARK: - Private Methods
+    
+    /// Clears all computed results
+    private func clearComputedResults() {
+        hasComputed = false
+        rrefSteps = []
+        rrefTSteps = []
+        columnSpace = []
+        rowSpace = []
+        nullSpace = []
+        leftNullSpace = []
+        pivots = []
+        determinantValue = nil
+        inverseMatrix = nil
     }
 }

@@ -15,7 +15,7 @@ struct GramSchmidtProcessView: View {
                             .bold()
                     }
                     
-                    Text("Converting Any Basis to Orthonormal")
+                    Text("The Algorithm for Creating Orthonormal Bases")
                         .font(.title3)
                         .foregroundColor(.secondary)
                 }
@@ -23,38 +23,93 @@ struct GramSchmidtProcessView: View {
                 .background(Color(uiColor: .secondarySystemBackground))
                 .cornerRadius(12)
                 
-                // Algorithm Overview
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("The Algorithm")
+                // Beginner-Friendly Introduction
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Why Orthonormal Bases are Special")
                         .font(.headline)
                     
-                    Text("The Gram-Schmidt process takes any linearly independent set and produces an orthonormal set that spans the same space.")
+                    Text("""
+An **orthonormal basis** is the "dream basis" for any subspace. It consists of vectors that are:
+1. **Orthogonal** (perpendicular) to each other: their dot products are all zero
+2. **Normal** (unit length): each vector has length 1
+
+**Why do we want this?**
+• **Projections become trivial:** projecting onto an orthonormal basis just requires dot products
+• **Coordinates are easy:** the coefficient for each basis vector is just a dot product
+• **Computations are stable:** orthonormal bases minimize numerical errors
+• **QR factorization:** Gram-Schmidt is the foundation of this important decomposition
+""")
+                        .font(.body)
+                    
+                    // Analogy
+                    HStack(spacing: 12) {
+                        Image(systemName: "lightbulb.fill")
+                            .foregroundColor(.yellow)
+                        Text("**Analogy:** Think of it like organizing a messy room. Your original basis vectors might be \"leaning\" on each other. Gram-Schmidt \"straightens them out\" so each points in a completely independent direction, and then scales them to standard length.")
+                            .font(.callout)
+                    }
+                    .padding()
+                    .background(Color.yellow.opacity(0.1))
+                    .cornerRadius(10)
+                }
+                .padding()
+                .background(Color(uiColor: .secondarySystemBackground))
+                .cornerRadius(12)
+                
+                // Algorithm Overview
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("The Algorithm Step-by-Step")
+                        .font(.headline)
+                    
+                    Text("""
+The key idea: **subtract off the parts that point in directions we've already covered**.
+
+For each new vector, we subtract its projections onto all the previous orthogonal vectors. What's left is the "new direction" that the vector contributes.
+""")
                         .font(.body)
                     
                     VStack(alignment: .leading, spacing: 8) {
                         GSAlgorithmStep(
                             step: 1,
                             formula: "w₁ = v₁",
-                            description: "Keep the first vector as-is"
+                            description: "Start with the first vector unchanged—this is our first direction"
                         )
                         
                         GSAlgorithmStep(
                             step: 2,
-                            formula: "w₂ = v₂ - projᵥ₁v₂",
-                            description: "Subtract the projection onto w₁"
+                            formula: "w₂ = v₂ − proj_w₁(v₂)",
+                            description: "Remove the part of v₂ that lies along w₁; what remains is perpendicular"
                         )
                         
                         GSAlgorithmStep(
                             step: 3,
-                            formula: "w₃ = v₃ - projᵥ₁v₃ - projᵥ₂v₃",
-                            description: "Subtract projections onto w₁ AND w₂"
+                            formula: "w₃ = v₃ − proj_w₁(v₃) − proj_w₂(v₃)",
+                            description: "Remove projections onto BOTH previous vectors"
                         )
                         
                         GSAlgorithmStep(
                             step: 4,
-                            formula: "wᵢ* = wᵢ / ||wᵢ||",
-                            description: "Normalize each vector to unit length"
+                            formula: "uᵢ = wᵢ / ||wᵢ||",
+                            description: "Normalize: divide each vector by its length to get unit vectors"
                         )
+                    }
+                    
+                    // Formula box
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("The Projection Formula")
+                            .font(.subheadline)
+                            .bold()
+                        
+                        Text("proj_u(v) = (v · u / u · u) × u")
+                            .font(.system(.body, design: .monospaced))
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.green.opacity(0.1))
+                            .cornerRadius(8)
+                        
+                        Text("This projects vector v onto the direction of u")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
                 }
                 .padding()

@@ -34,7 +34,7 @@ struct VectorArithmeticView: View {
             VStack(alignment: .leading, spacing: 20) {
                 // Intro
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Basic Vector Arithmetic")
+                    Text("Vector Arithmetic")
                         .font(.largeTitle)
                         .bold()
                     Text("Addition, Subtraction, and Scalar Multiplication")
@@ -50,13 +50,42 @@ struct VectorArithmeticView: View {
                     .padding(.vertical)
                     
                     if mode == .linearCombination {
-                        Text("This module demonstrates the fundamental operations of Linear Algebra: **Scalar Multiplication** and **Vector Addition**.\n\nWhen we multiply a vector by a scalar (a single number), we scale its magnitude. When we add vectors, we combine their effects. Together, these operations form a **Linear Combination**: a·x + b·y + c·z.")
-                            .font(.body)
-                            .padding(.vertical, 4)
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("What is a Linear Combination?")
+                                .font(.headline)
+                            
+                            Text("""
+A **linear combination** is one of the most fundamental concepts in linear algebra. It answers the question: "What new vectors can I create by scaling and adding existing vectors?"
+
+**The Two Building Blocks:**
+1. **Scalar Multiplication**: Multiply each component of a vector by the same number (called a "scalar"). This stretches or shrinks the vector.
+2. **Vector Addition**: Add vectors component by component. This combines their effects.
+
+**Example:** If you walk 2 blocks east (vector x) and then 3 blocks north (vector y), your total displacement is the linear combination 2x + 3y.
+
+Below, we compute: **a·x + b·y + c·z** where a, b, c are scalars and x, y, z are vectors.
+""")
+                                .font(.body)
+                        }
                     } else {
-                        Text("Vector Subtraction is formally defined as adding the negative of a vector: **u - v = u + (-1)v**.\n\nHere we subtract Vector B from Vector A component-wise.")
-                            .font(.body)
-                            .padding(.vertical, 4)
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("What is Vector Subtraction?")
+                                .font(.headline)
+                            
+                            Text("""
+**Vector Subtraction** is simply adding the negative of a vector:
+
+**u - v = u + (-1)·v**
+
+When you subtract v from u, you're asking: "What vector do I need to add to v to get u?" The answer is the difference vector (u - v).
+
+**Geometric Meaning:** If u and v are position vectors (pointing from the origin to points U and V), then u - v points from V to U.
+
+**How it works:** Subtract the corresponding components:
+• (u₁ - v₁, u₂ - v₂, u₃ - v₃, ...)
+""")
+                                .font(.body)
+                        }
                     }
                 }
                 .padding()

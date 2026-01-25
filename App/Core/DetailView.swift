@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Main detail view that displays content for selected app section
+/// Routes to appropriate view based on section type
 struct DetailView: View {
     let section: AppSection
     @Binding var selectedSection: AppSection?
@@ -8,22 +10,40 @@ struct DetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                HStack {
-                    if !section.iconName.isEmpty {
-                        Image(systemName: section.iconName).font(.title)
-                    } else {
-                        Text(section.notation)
-                            .font(.system(.title, design: .monospaced))
-                            .bold()
-                            .padding(6)
-                            .background(Color.gray.opacity(0.2))
-                            .cornerRadius(8)
-                    }
-                    Text(section.rawValue)
-                        .font(.largeTitle)
-                        .bold()
-                }
-                
+                sectionHeader
+                sectionContent
+            }
+            .padding()
+        }
+    }
+    
+    // MARK: - Private Views
+    
+    @ViewBuilder
+    private var sectionHeader: some View {
+        HStack {
+            if !section.iconName.isEmpty {
+                Image(systemName: section.iconName)
+                    .font(.title)
+                    .foregroundColor(.accentColor)
+            } else {
+                Text(section.notation)
+                    .font(.system(.title, design: .monospaced))
+                    .bold()
+                    .padding(6)
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(8)
+            }
+            Text(section.rawValue)
+                .font(.largeTitle)
+                .bold()
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Section: \(section.rawValue)")
+    }
+    
+    @ViewBuilder
+    private var sectionContent: some View {
                 switch section {
                 case .matrixSetup:
                     MatrixSetupView(selectedSection: $selectedSection)
@@ -207,11 +227,5 @@ struct DetailView: View {
                 case .examMode:
                     ExamModeView()
                 }
-                
-                Spacer()
-            }
-            .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
     }
 }

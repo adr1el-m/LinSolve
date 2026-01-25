@@ -20,7 +20,7 @@ struct IntroductionView: View {
                         .italic()
                         .foregroundColor(.secondary)
                     
-                    Text("Visualize, Compute, and Understand")
+                    Text("Learn • Compute • Visualize • Master")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .padding(.top, 4)
@@ -30,40 +30,46 @@ struct IntroductionView: View {
                 .background(Color(uiColor: .secondarySystemBackground))
                 .cornerRadius(20)
                 
+                // Welcome Section (NEW)
+                welcomeSection
+                
+                // Why Linear Algebra Matters (NEW)
+                whyLinearAlgebraSection
+                
                 // Mathematical Foundation Section
                 VStack(alignment: .leading, spacing: 20) {
-                    Text("Mathematical Foundation")
+                    Text("The Building Blocks")
                         .font(.title2)
                         .bold()
                     
-                    Text("Linear algebra is the branch of mathematics concerning **linear equations**, **linear maps**, and their representations in **vector spaces** and through **matrices**. It is fundamental to almost every area of modern mathematics and its applications.")
+                    Text("Before diving into the details, let's understand the three fundamental objects you'll work with throughout this app. Don't worry if these seem abstract at first—each topic in this app will help you develop intuition through **interactive examples** and **step-by-step explanations**.")
                         .font(.body)
                     
                     // Core Concepts
                     VStack(alignment: .leading, spacing: 16) {
                         MathConceptRow(
-                            symbol: "A",
-                            title: "Matrices",
-                            definition: "An m × n matrix A is a rectangular array of numbers arranged in m rows and n columns.",
-                            formula: "A = [aᵢⱼ] ∈ ℝᵐˣⁿ"
+                            symbol: "v",
+                            title: "Vectors: The Foundation",
+                            definition: "Think of a vector as an ordered list of numbers. In 2D, a vector like [3, 4] can represent a point on a graph, a direction to walk, or even a color (red, green). In physics, vectors represent forces, velocities, and positions. The key insight: vectors can be added together and scaled (multiplied by numbers).",
+                            formula: "v = [v₁, v₂, ..., vₙ]ᵀ"
                         )
                         
                         Divider()
                         
                         MathConceptRow(
-                            symbol: "v",
-                            title: "Vectors",
-                            definition: "A vector is an ordered list of numbers. In ℝⁿ, vectors can represent points, directions, or physical quantities.",
-                            formula: "v = [v₁, v₂, ..., vₙ]ᵀ ∈ ℝⁿ"
+                            symbol: "A",
+                            title: "Matrices: Organized Data",
+                            definition: "A matrix is simply a rectangular grid of numbers arranged in rows and columns. An m × n matrix has m rows and n columns. Matrices can represent systems of equations, transformations (like rotations or reflections), data tables, and even images! Every pixel on your screen can be described by a matrix.",
+                            formula: "A is m × n (m rows, n columns)"
                         )
                         
                         Divider()
                         
                         MathConceptRow(
                             symbol: "Ax=b",
-                            title: "Linear Systems",
-                            definition: "A system of linear equations can be written in matrix form as Ax = b, where we seek the vector x that satisfies all equations simultaneously.",
-                            formula: "Ax = b, where A ∈ ℝᵐˣⁿ, x ∈ ℝⁿ, b ∈ ℝᵐ"
+                            title: "Linear Systems: The Central Problem",
+                            definition: "The equation Ax = b is at the heart of linear algebra. Given a matrix A and a vector b, we want to find the vector x that makes the equation true. This single problem has countless applications: balancing chemical equations, analyzing circuits, computer graphics, machine learning, and much more.",
+                            formula: "Find x such that Ax = b"
                         )
                     }
                     .padding()
@@ -382,14 +388,19 @@ struct IntroductionView: View {
                 
                 // Getting Started
                 VStack(alignment: .leading, spacing: 24) {
-                    Text("Getting Started")
+                    Text("Your Learning Journey")
                         .font(.title2)
                         .bold()
                     
+                    Text("This app is organized to take you from absolute beginner to confident problem-solver. Follow the sidebar from top to bottom, or jump to any topic you need to review.")
+                        .font(.body)
+                    
                     VStack(alignment: .leading, spacing: 16) {
-                        InstructionRow(number: "1", text: "Go to 'Matrix Setup' to define your matrix A.")
-                        InstructionRow(number: "2", text: "Tap 'Compute' to generate all derived properties.")
-                        InstructionRow(number: "3", text: "Navigate through the topics to see detailed step-by-step derivations.")
+                        InstructionRow(number: "1", text: "Start with **Part I: Foundations** to learn about vectors and basic matrix operations.")
+                        InstructionRow(number: "2", text: "Move to **Part II: Linear Systems** to master solving equations—the core skill of linear algebra.")
+                        InstructionRow(number: "3", text: "Explore **Matrix Calculator** anytime to experiment with your own matrices and see step-by-step solutions.")
+                        InstructionRow(number: "4", text: "Use **Practice Problems** and **Exam Mode** to test your understanding and build confidence.")
+                        InstructionRow(number: "5", text: "Try the **3D Visualization** tool to develop geometric intuition for abstract concepts.")
                     }
                     .padding()
                     .background(Color(uiColor: .secondarySystemBackground))
@@ -401,6 +412,82 @@ struct IntroductionView: View {
             .padding(.horizontal, 40)
             .padding(.vertical, 20)
         }
+    }
+    
+    // MARK: - Welcome Section
+    private var welcomeSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Welcome, Future Mathematician! 👋")
+                .font(.title2)
+                .bold()
+            
+            Text("""
+Whether you're taking your first linear algebra course, preparing for an exam, or just curious about the mathematics behind AI, computer graphics, and data science—you're in the right place.
+
+**LinSolve** is designed to be your study companion. Unlike a textbook that shows you the final answer, this app walks you through **every single step** of every calculation. You'll see exactly how each operation works, why it matters, and how it connects to the bigger picture.
+
+**What makes this app special:**
+• **Step-by-step solutions** that show you the "how" and "why"
+• **Interactive calculators** where you can experiment with your own problems
+• **Visual tools** that bring abstract math to life in 2D and 3D
+• **Practice problems** with instant feedback
+• **Beginner-friendly explanations** that build intuition before formulas
+""")
+                .font(.body)
+        }
+        .padding()
+        .background(Color.blue.opacity(0.1))
+        .cornerRadius(16)
+    }
+    
+    // MARK: - Why Linear Algebra Section
+    private var whyLinearAlgebraSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Why Learn Linear Algebra?")
+                .font(.title2)
+                .bold()
+            
+            Text("Linear algebra is everywhere in modern technology. Here's what you'll be able to understand after mastering these concepts:")
+                .font(.body)
+            
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                ApplicationCard(
+                    icon: "brain.head.profile",
+                    title: "Machine Learning & AI",
+                    description: "Neural networks are fundamentally matrix operations. Every AI model you've heard of—GPT, image recognition, recommendation systems—runs on linear algebra.",
+                    color: .purple
+                )
+                
+                ApplicationCard(
+                    icon: "cube.transparent",
+                    title: "3D Graphics & Games",
+                    description: "Every 3D video game uses matrices to rotate, scale, and project objects onto your screen. Character animations? Matrix transformations.",
+                    color: .orange
+                )
+                
+                ApplicationCard(
+                    icon: "waveform.path.ecg",
+                    title: "Signal Processing",
+                    description: "Audio compression, noise cancellation, and medical imaging all rely on linear algebra to analyze and transform signals.",
+                    color: .green
+                )
+                
+                ApplicationCard(
+                    icon: "chart.line.uptrend.xyaxis",
+                    title: "Data Science",
+                    description: "From analyzing trends to making predictions, data scientists use linear regression and matrix operations daily.",
+                    color: .blue
+                )
+            }
+            
+            Text("Learning linear algebra isn't just about passing a class—it's about gaining a **superpower** that unlocks entire fields of technology and science.")
+                .font(.callout)
+                .italic()
+                .padding(.top, 8)
+        }
+        .padding()
+        .background(Color(uiColor: .secondarySystemBackground))
+        .cornerRadius(16)
     }
 }
 
@@ -565,9 +652,41 @@ struct InstructionRow: View {
                 .frame(width: 28, height: 28)
                 .background(Circle().fill(Color.blue))
             
-            Text(text)
+            Text(.init(text)) // Enables markdown parsing
                 .font(.system(size: 18, design: .serif))
                 .foregroundColor(.primary)
         }
+    }
+}
+
+// MARK: - Application Card (New)
+struct ApplicationCard: View {
+    let icon: String
+    let title: String
+    let description: String
+    let color: Color
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: icon)
+                    .font(.title2)
+                    .foregroundColor(color)
+                Spacer()
+            }
+            
+            Text(title)
+                .font(.headline)
+                .bold()
+            
+            Text(description)
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(color.opacity(0.1))
+        .cornerRadius(12)
     }
 }

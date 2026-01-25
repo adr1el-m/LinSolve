@@ -30,12 +30,16 @@ struct SubspaceVerificationView: View {
                     Text("What is a Subspace?")
                         .font(.headline)
                     
-                    Text("A subspace of ℝⁿ is a special subset that \"behaves like\" a vector space on its own. It must contain the zero vector and be closed under the two fundamental operations: vector addition and scalar multiplication.")
+                    Text("""
+A **subspace** is one of the most important concepts in linear algebra. Simply put, a subspace is a "smaller" vector space that lives inside a larger one.
+
+**The Intuition:** Imagine you're in 3D space (ℝ³). A plane that passes through the origin is a subspace—it's a 2D "slice" of the 3D world. A line through the origin is also a subspace—a 1D "thread" within the larger space. The key is that these sets behave like complete vector spaces on their own.
+
+**Why Must They Pass Through the Origin?** Because every vector space must contain the zero vector (it's the "identity" for addition). If your plane or line doesn't go through the origin, it can't be a subspace!
+
+**Think of it this way:** A subspace is like a "self-contained playground" where you can freely add vectors and multiply by scalars without ever escaping the playground.
+""")
                         .font(.body)
-                    
-                    Text("Think of a subspace as a flat surface (like a plane or line) that passes through the origin. Any combination of vectors in that surface stays within the surface.")
-                        .font(.body)
-                        .foregroundColor(.secondary)
                 }
                 .padding()
                 .background(Color(uiColor: .secondarySystemBackground))

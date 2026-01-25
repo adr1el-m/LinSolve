@@ -15,20 +15,34 @@ struct DotProductApplicationView: View {
             VStack(alignment: .leading, spacing: 20) {
                 // Header Section
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Dot Product Application")
+                    Text("The Dot Product")
                         .font(.largeTitle)
                         .bold()
-                    Text("Computing Total Cost from Prices and Quantities")
+                    Text("The Most Fundamental Operation Between Vectors")
                         .font(.title3)
                         .foregroundColor(.secondary)
                     
-                    Text("""
-The **dot product** (also called the **inner product** or **scalar product**) is one of the most fundamental operations in linear algebra. It takes two vectors of the same dimension and produces a single number (a scalar).
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("What is the Dot Product?")
+                            .font(.headline)
+                        
+                        Text("""
+The **dot product** (also called the **inner product** or **scalar product**) is one of the most important operations in all of mathematics. It takes two vectors of the same size and produces a single number.
 
-**Real-World Application:** Imagine you're shopping and have a list of unit prices for different items and the quantities you want to buy. The dot product gives you the **total cost** by multiplying each price by its corresponding quantity and summing the results.
+**Why is it so important?** The dot product appears everywhere:
+• **Geometry:** It measures the angle between vectors
+• **Physics:** Work = Force · Displacement (literally a dot product!)
+• **Machine Learning:** Similarity between data points
+• **Graphics:** Lighting calculations and projections
+• **Economics:** Total cost = prices · quantities
+
+**The Magic:** The sign of the dot product tells you about direction:
+• **Positive** → vectors point in roughly the same direction (angle < 90°)
+• **Zero** → vectors are perpendicular (exactly 90°)
+• **Negative** → vectors point in roughly opposite directions (angle > 90°)
 """)
-                        .font(.body)
-                        .padding(.vertical, 4)
+                            .font(.body)
+                    }
                 }
                 .padding()
                 .background(Color(uiColor: .secondarySystemBackground))

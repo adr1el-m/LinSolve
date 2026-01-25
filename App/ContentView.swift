@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Main content view providing navigation split view architecture
+/// Manages theme settings and matrix data computation
 struct ContentView: View {
     @State private var selectedSection: AppSection? = .introduction
     @StateObject private var matrixData = MatrixData()
@@ -11,19 +13,36 @@ struct ContentView: View {
             SidebarView(selectedSection: $selectedSection)
                 .navigationTitle("LinSolve")
         } detail: {
-            if let section = selectedSection {
-                DetailView(section: section, selectedSection: $selectedSection)
-                    .environmentObject(matrixData)
-            } else {
-                Text("Select a topic")
-                    .foregroundColor(.secondary)
-            }
+            detailContent
         }
-        .preferredColorScheme(useSystemTheme ? nil : (isDarkMode ? .dark : .light))
-        .onAppear {
-            if !matrixData.hasComputed {
-                matrixData.compute()
-            }
+        .preferredColorScheme(colorScheme)
+        .onAppear(perform: initializeMatrixData)
+    }
+    
+    // MARK: - Private Views
+    
+    @ViewBuilder
+    private var detailContent: some View {
+        if let section = selectedSection {
+            DetailView(section: section, selectedSection: $selectedSection)
+                .environmentObject(matrixData)
+        } else {
+            Text("Select a topic")
+                .foregroundColor(.secondary)
+                .font(.title3)
         }
+    }
+    
+    // MARK: - Computed Properties
+    
+    private var colorScheme: ColorScheme? {
+        useSystemTheme ? nil : (isDarkMode ? .dark : .light)
+    }
+    
+    // MARK: - Private Methods
+    
+    private func initializeMatrixData() {
+        guard !matrixData.hasComputed else { return }
+        matrixData.compute()
     }
 }

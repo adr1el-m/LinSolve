@@ -29,22 +29,57 @@ struct GaussianEliminationView: View {
                     Text("Gaussian Elimination")
                         .font(.largeTitle)
                         .bold()
-                    Text("Basic Row Operations Method")
+                    Text("The Foundation of Solving Linear Systems")
                         .font(.title3)
                         .foregroundColor(.secondary)
                     
-                    Text("""
-**Gaussian Elimination** is a systematic method for solving systems of linear equations. It uses **elementary row operations** to transform an augmented matrix into **Row Echelon Form (REF)**, then applies **back substitution** to find the solution.
+                    // Beginner-friendly explanation
+                    VStack(alignment: .leading, spacing: 16) {
+                        Text("What is Gaussian Elimination?")
+                            .font(.headline)
+                        
+                        Text("""
+**Gaussian Elimination** is a systematic method for solving systems of linear equations—perhaps the most important algorithm in all of linear algebra.
 
-**The Three Elementary Row Operations:**
-1. **Swap** two rows (Rᵢ ↔ Rⱼ)
-2. **Scale** a row by a non-zero constant (Rᵢ → cRᵢ)
-3. **Add** a multiple of one row to another (Rᵢ → Rᵢ + cRⱼ)
+**The Big Idea:** Instead of trying to solve all equations at once, we systematically simplify the system by eliminating variables one at a time. We do this by combining equations in clever ways that preserve the solution.
 
-These operations do not change the solution set!
+**Why It Works:** Imagine you have 3 equations with 3 unknowns. If you can combine them to create a simpler equation with just one unknown, you can solve for that variable. Then substitute back to find the others!
 """)
-                        .font(.body)
-                        .padding(.vertical, 4)
+                            .font(.body)
+                        
+                        Divider()
+                        
+                        Text("The Three Elementary Row Operations")
+                            .font(.headline)
+                        
+                        Text("""
+These are the ONLY operations we're allowed to perform. They're called "elementary" because they're simple, and crucially, **they never change the solution set**.
+
+**1. Swap** two rows (Rᵢ ↔ Rⱼ)
+   • Just reordering equations doesn't change their solutions
+   • Example: "x + y = 3" and "2x - y = 0" is the same system whether equation 1 or 2 comes first
+
+**2. Scale** a row by a non-zero constant (Rᵢ → cRᵢ)
+   • Multiplying both sides of an equation by the same number keeps it balanced
+   • Example: "x + y = 3" multiplied by 2 gives "2x + 2y = 6" — same line!
+
+**3. Add** a multiple of one row to another (Rᵢ → Rᵢ + cRⱼ)
+   • This is the key operation for elimination
+   • Example: Adding "-2 times row 1" to row 2 eliminates the x term from row 2
+""")
+                            .font(.body)
+                        
+                        // Visual tip
+                        HStack(spacing: 12) {
+                            Image(systemName: "lightbulb.fill")
+                                .foregroundColor(.yellow)
+                            Text("**Pro Tip:** The goal is to create zeros below each \"pivot\" (the leading non-zero entry in each row). This triangular pattern is called Row Echelon Form.")
+                                .font(.callout)
+                        }
+                        .padding()
+                        .background(Color.yellow.opacity(0.1))
+                        .cornerRadius(10)
+                    }
                 }
                 .padding()
                 .background(Color(uiColor: .secondarySystemBackground))

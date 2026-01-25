@@ -1,5 +1,7 @@
 import SwiftUI
 
+/// Represents all available sections and topics in the LinSolve app
+/// Each section corresponds to a specific linear algebra concept or tool
 enum AppSection: String, CaseIterable, Identifiable {
     case introduction = "Introduction"
     case matrixSetup = "Matrix Setup"
