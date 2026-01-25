@@ -284,11 +284,11 @@ If we get a row of zeros on the left side at any point, the matrix is **singular
             
             // Swap if needed
             if pivotRow != col {
-                var tempLeft = left[col]
+                let tempLeft = left[col]
                 left[col] = left[pivotRow]
                 left[pivotRow] = tempLeft
                 
-                var tempRight = right[col]
+                let tempRight = right[col]
                 right[col] = right[pivotRow]
                 right[pivotRow] = tempRight
                 

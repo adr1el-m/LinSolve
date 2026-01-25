@@ -130,6 +130,82 @@ struct DetailView: View {
                     SolveWithInverseView()
                 case .elementaryMatrices:
                     ElementaryMatricesView()
+                case .permutationsInversions:
+                    PermutationsInversionsView()
+                case .basicDeterminantCalc:
+                    BasicDeterminantCalcView()
+                case .geometricApplications:
+                    GeometricApplicationsView()
+                case .determinantProperties:
+                    DeterminantPropertiesView()
+                case .cofactorExpansionMethod:
+                    CofactorExpansionMethodView()
+                case .adjugateInverse:
+                    AdjugateInverseView()
+                case .cramersRule:
+                    CramersRuleView()
+                case .orthogonalDiagonalization:
+                    OrthogonalDiagonalizationView()
+                case .subspaceVerification:
+                    SubspaceVerificationView()
+                case .subspaceOperations:
+                    SubspaceOperationsView()
+                case .spanningSets:
+                    SpanningSetsView()
+                case .linearIndependenceBasic:
+                    LinearIndependenceBasicView()
+                case .linearIndependenceAlgorithms:
+                    LinearIndependenceAlgorithmsView()
+                case .findingBases:
+                    FindingBasesView()
+                case .basisVerification:
+                    VerifyingBasisView()
+                case .constructingBases:
+                    ConstructingBasesView()
+                case .intersectionsExtensions:
+                    IntersectionsExtensionsView()
+                case .verifyingOrthogonalSets:
+                    VerifyingOrthogonalSetsView()
+                case .orthogonalProjection:
+                    OrthogonalProjectionView()
+                case .gramSchmidtProcess:
+                    GramSchmidtProcessView()
+                case .matrixTransformations:
+                    MatrixTransformationsView()
+                case .checkingLinearity:
+                    CheckingLinearityView()
+                case .transformationsFromBasis:
+                    TransformationsFromBasisView()
+                case .verifyingIsometries:
+                    VerifyingIsometriesView()
+                case .rotationsReflections:
+                    RotationsReflectionsView()
+                case .analyzingOrthogonalMatrices:
+                    AnalyzingOrthogonalMatricesView()
+                case .compositionOfTransformations:
+                    CompositionOfTransformationsView()
+                case .invertingLinearOperators:
+                    InvertingLinearOperatorsView()
+                case .kernelAndRange:
+                    KernelAndRangeView()
+                case .fundamentalSubspaces:
+                    FundamentalSubspacesView()
+                case .orthogonalComplements:
+                    OrthogonalComplementsView()
+                case .symmetricMatrixProducts:
+                    SymmetricMatrixProductsView()
+                case .projectionMatrices:
+                    ProjectionMatricesView()
+                case .computingProjections:
+                    ComputingProjectionsView()
+                case .projectionOrthogonalComplement:
+                    ProjectionOrthogonalComplementView()
+                case .pdfExport:
+                    PDFExportView()
+                case .practiceProblems:
+                    PracticeProblemsView()
+                case .examMode:
+                    ExamModeView()
                 }
                 
                 Spacer()

@@ -244,7 +244,7 @@ This is different from matrix multiplication, which has its own dimension requir
     func compute() {
         let a = matrixA.map { row in row.map { Fraction(string: $0) } }
         let b = matrixB.map { row in row.map { Fraction(string: $0) } }
-        let c = matrixC.map { row in row.map { Fraction(string: $0) } }
+
         let cScalar = Fraction(string: scalarA)
         let dScalar = Fraction(string: scalarB)
         

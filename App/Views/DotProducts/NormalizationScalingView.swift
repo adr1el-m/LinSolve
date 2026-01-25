@@ -348,8 +348,7 @@ Once you have a unit vector, you can **scale** it to create a vector of any desi
         unitVector = unitVecDouble.map { Fraction(Int(round($0 * 10000)), 10000) }
         
         // Scaled vector - keep as fractions for cleaner display
-        let xFrac = xVec.map { Fraction(string: $0) }
-        let normFrac = Fraction(Int(round(normDouble * 1000)), 1000)
+
         
         // For nice display, compute scaled vector as (target/norm) * x
         let scaleFactor = target / normDouble

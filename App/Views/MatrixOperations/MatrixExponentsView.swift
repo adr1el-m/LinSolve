@@ -280,7 +280,7 @@ Matrix powers are essential in:
         }
         
         // Apply scalar
-        let scalarPowerDouble = pow(scalarVal.asDouble, Double(exponent))
+
         // Try to keep as fraction if possible
         var scalarPower = Fraction(1)
         for _ in 0..<exponent {
