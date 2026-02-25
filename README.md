@@ -314,9 +314,3 @@ This project was created as a submission to the **Apple Swift Student Challenge 
 ## License
 
 This project is submitted for the Apple Swift Student Challenge 2026.
-
----
-
-<p align="center">
-  Built with ❤️ and Swift
-</p>
